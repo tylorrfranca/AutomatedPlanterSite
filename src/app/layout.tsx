@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-    title: "Lucas Amberg",
-    description: "Lucas Amberg's Portfolio Site",
+    title: "AutonoPlant - Automated Plant Care System",
+    description: "The future of automated gardening. Intelligent plant care that adapts to your plants' needs, ensuring optimal growth with minimal effort.",
 };
 
 export default function RootLayout({
