@@ -38,8 +38,3 @@ next-env.d.ts
 ## Panda
 styled-system
 styled-system-studio
-
-# database
-*.db
-*.sqlite
-*.sqlite3
