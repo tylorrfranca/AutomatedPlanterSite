@@ -47,59 +47,37 @@ export default function Home() {
             <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
             
             {/* Hero Section */}
-            <Container maxW="7xl" py="32" px="8" position="relative" zIndex="1" pt="120px">
-                <VStack gap="20" alignItems="center">
+            <Container maxW="7xl" py="20" px="8" position="relative" zIndex="1" pt="140px">
+                <VStack gap="12" alignItems="center">
                     {/* Header */}
-                    <VStack gap="8" textAlign="center" maxW="5xl">
-                        <Badge 
-                            size="2" 
-                            color="green" 
-                            variant="soft"
+                    <VStack gap="6" textAlign="center" maxW="6xl">
+                        {/* Logo */}
+                        <img 
+                            src="/SproutlyLogoDesign.png" 
+                            alt="Sproutly Logo" 
                             style={{
-                                background: "linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.15) 100%)",
-                                color: "#15803d",
-                                border: "1px solid rgba(34, 197, 94, 0.3)",
-                                fontSize: "14px",
-                                fontWeight: "600",
-                                padding: "10px 20px",
-                                boxShadow: "0 4px 12px rgba(34, 197, 94, 0.2)"
+                                width: "400px",
+                                height: "400px",
+                                marginBottom: "50px",
+                                filter: "drop-shadow(0 16px 32px rgba(34, 197, 94, 0.5))"
                             }}
-                        >
-                            🌱 Smart Agriculture Technology
-                        </Badge>
-                        
-                        <Heading 
-                            style={{
-                                fontSize: "clamp(3.5rem, 8vw, 7rem)",
-                                fontWeight: "700",
-                                letterSpacing: "-0.04em",
-                                lineHeight: "0.9",
-                                background: "linear-gradient(135deg, #15803d 0%, #16a34a 15%, #22c55e 35%, #4ade80 65%, #86efac 85%, #bbf7d0 100%)",
-                                WebkitBackgroundClip: "text",
-                                WebkitTextFillColor: "transparent",
-                                backgroundClip: "text",
-                                marginBottom: "24px",
-                                filter: "drop-shadow(0 4px 8px rgba(34, 197, 94, 0.3))"
-                            }}
-                        >
-                            AutonoPlant
-                        </Heading>
+                        />
                         
                         <Text 
                             style={{ 
-                                fontSize: "28px",
-                                lineHeight: "1.4", 
-                                maxWidth: "800px",
-                                color: "#374151",
-                                fontWeight: "400",
-                                letterSpacing: "-0.01em"
+                                fontSize: "32px",
+                                lineHeight: "1.3", 
+                                maxWidth: "900px",
+                                color: "#1f2937",
+                                fontWeight: "500",
+                                letterSpacing: "-0.01em",
+                                marginBottom: "32px"
                             }}
                         >
-                            The future of intelligent gardening. Revolutionary plant care that learns, adapts, and nurtures — 
-                            so you can grow anything, anywhere.
+                            The future of intelligent gardening. Revolutionary plant care that learns, adapts, and nurtures.
                         </Text>
                         
-                        <HStack gap="6" justify="center" mt="12">
+                        <HStack gap="6" justify="center" mt="8">
                             <Button 
                                 size="4" 
                                 color="green" 
@@ -418,7 +396,7 @@ export default function Home() {
                                         fontWeight: "500"
                                     }}
                                 >
-                                    Thousands of growers worldwide trust AutonoPlant to nurture their most precious plants.
+                                    Thousands of growers worldwide trust Sproutly to nurture their most precious plants.
                                 </Text>
                             </VStack>
                             
@@ -609,7 +587,7 @@ export default function Home() {
                                     e.currentTarget.style.background = "linear-gradient(135deg, #16a34a 0%, #22c55e 25%, #4ade80 50%, #86efac 75%, #bbf7d0 100%)";
                                 }}
                             >
-                                Get AutonoPlant
+                                Get Sproutly
                             </Button>
                             <Button 
                                 size="4"
