@@ -38,7 +38,7 @@ export default function Navigation({ currentPage, onPageChange }: NavigationProp
               padding: '8px 16px'
             }}
           >
-            🌱 AutonoPlant
+            🌱 Sproutly
           </Badge>
         </HStack>
         

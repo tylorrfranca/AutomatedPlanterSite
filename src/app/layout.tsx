@@ -11,8 +11,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-    title: "AutonoPlant - Automated Plant Care System",
+    title: "Sproutly - Automated Plant Care System",
     description: "The future of automated gardening. Intelligent plant care that adapts to your plants' needs, ensuring optimal growth with minimal effort.",
+    icons: {
+        icon: '/SproutlyLogoDesign.png',
+        shortcut: '/SproutlyLogoDesign.png',
+        apple: '/SproutlyLogoDesign.png',
+    },
 };
 
 export default function RootLayout({
