@@ -1,9 +1,36 @@
 "use client";
 
+import { useState } from 'react';
 import { VStack, HStack, Box, Container } from "panda";
 import { Heading, Text, Button, Card, Badge } from "@radix-ui/themes";
+import Navigation from '@/components/Navigation';
+import PlantManager from '@/components/PlantManager';
 
 export default function Home() {
+    const [currentPage, setCurrentPage] = useState<'home' | 'plants'>('home');
+
+    if (currentPage === 'plants') {
+        return (
+            <Box minH="100vh" bg="white" position="relative">
+                {/* Gradient Background Overlay */}
+                <Box 
+                    position="absolute"
+                    top="0"
+                    left="0"
+                    right="0"
+                    height="100vh"
+                    background="radial-gradient(ellipse at top, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.08) 40%, transparent 70%)"
+                    zIndex="0"
+                />
+                
+                <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+                <Box pt="80px" position="relative" zIndex="1">
+                    <PlantManager />
+                </Box>
+            </Box>
+        );
+    }
+
     return (
         <Box minH="100vh" bg="white" position="relative">
             {/* Gradient Background Overlay */}
@@ -17,8 +44,10 @@ export default function Home() {
                 zIndex="0"
             />
             
+            <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+            
             {/* Hero Section */}
-            <Container maxW="7xl" py="32" px="8" position="relative" zIndex="1">
+            <Container maxW="7xl" py="32" px="8" position="relative" zIndex="1" pt="120px">
                 <VStack gap="20" alignItems="center">
                     {/* Header */}
                     <VStack gap="8" textAlign="center" maxW="5xl">
@@ -75,6 +104,7 @@ export default function Home() {
                                 size="4" 
                                 color="green" 
                                 variant="solid"
+                                onClick={() => setCurrentPage('plants')}
                                 style={{
                                     background: "linear-gradient(135deg, #16a34a 0%, #22c55e 25%, #4ade80 75%, #86efac 100%)",
                                     border: "none",
@@ -98,7 +128,7 @@ export default function Home() {
                                     e.currentTarget.style.background = "linear-gradient(135deg, #16a34a 0%, #22c55e 25%, #4ade80 75%, #86efac 100%)";
                                 }}
                             >
-                                Get Started
+                                Manage Plants
                             </Button>
                             <Button 
                                 size="4" 
@@ -554,6 +584,7 @@ export default function Home() {
                         <HStack gap="6" justify="center" mt="8">
                             <Button 
                                 size="4"
+                                onClick={() => setCurrentPage('plants')}
                                 style={{
                                     background: "linear-gradient(135deg, #16a34a 0%, #22c55e 25%, #4ade80 50%, #86efac 75%, #bbf7d0 100%)",
                                     border: "none",
