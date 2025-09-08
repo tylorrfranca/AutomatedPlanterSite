@@ -12,6 +12,8 @@ interface PlantFormData {
   light_min: string;
   light_max: string;
   soil_type: string;
+  soil_moisture_min: string;
+  soil_moisture_max: string;
   humidity_min: string;
   humidity_max: string;
   temperature_min: string;
@@ -30,6 +32,8 @@ export default function PlantManager() {
     light_min: '',
     light_max: '',
     soil_type: '',
+    soil_moisture_min: '',
+    soil_moisture_max: '',
     humidity_min: '',
     humidity_max: '',
     temperature_min: '',
@@ -64,6 +68,8 @@ export default function PlantManager() {
       light_min: '',
       light_max: '',
       soil_type: '',
+      soil_moisture_min: '',
+      soil_moisture_max: '',
       humidity_min: '',
       humidity_max: '',
       temperature_min: '',
@@ -83,6 +89,8 @@ export default function PlantManager() {
       light_min: parseFloat(formData.light_min),
       light_max: parseFloat(formData.light_max),
       soil_type: formData.soil_type,
+      soil_moisture_min: parseFloat(formData.soil_moisture_min),
+      soil_moisture_max: parseFloat(formData.soil_moisture_max),
       humidity_min: parseFloat(formData.humidity_min),
       humidity_max: parseFloat(formData.humidity_max),
       temperature_min: parseFloat(formData.temperature_min),
@@ -120,6 +128,8 @@ export default function PlantManager() {
       light_min: plant.light_min.toString(),
       light_max: plant.light_max.toString(),
       soil_type: plant.soil_type,
+      soil_moisture_min: plant.soil_moisture_min.toString(),
+      soil_moisture_max: plant.soil_moisture_max.toString(),
       humidity_min: plant.humidity_min.toString(),
       humidity_max: plant.humidity_max.toString(),
       temperature_min: plant.temperature_min.toString(),
@@ -222,6 +232,29 @@ export default function PlantManager() {
                         value={formData.soil_type}
                         onChange={(e) => handleInputChange('soil_type', e.target.value)}
                         placeholder="Well-draining potting mix"
+                        required
+                      />
+                    </VStack>
+                  </HStack>
+
+                  <HStack gap="4" style={{ width: '100%' }}>
+                    <VStack gap="2" style={{ flex: 1 }}>
+                      <Text size="2" weight="medium">Soil Moisture Min (%)</Text>
+                      <TextField.Root
+                        type="number"
+                        value={formData.soil_moisture_min}
+                        onChange={(e) => handleInputChange('soil_moisture_min', e.target.value)}
+                        placeholder="20"
+                        required
+                      />
+                    </VStack>
+                    <VStack gap="2" style={{ flex: 1 }}>
+                      <Text size="2" weight="medium">Soil Moisture Max (%)</Text>
+                      <TextField.Root
+                        type="number"
+                        value={formData.soil_moisture_max}
+                        onChange={(e) => handleInputChange('soil_moisture_max', e.target.value)}
+                        placeholder="60"
                         required
                       />
                     </VStack>
@@ -371,6 +404,11 @@ export default function PlantManager() {
                   <HStack gap="2">
                     <Text size="2" weight="medium">🌱 Soil:</Text>
                     <Text size="2">{plant.soil_type}</Text>
+                  </HStack>
+                  
+                  <HStack gap="2">
+                    <Text size="2" weight="medium">💧 Soil Moisture:</Text>
+                    <Text size="2">{plant.soil_moisture_min}% - {plant.soil_moisture_max}%</Text>
                   </HStack>
                 </VStack>
 
