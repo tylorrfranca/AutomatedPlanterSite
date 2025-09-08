@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     const requiredFields = [
       'name', 'water_amount', 'watering_frequency', 'light_min', 'light_max',
-      'soil_type', 'humidity_min', 'humidity_max', 'temperature_min', 'temperature_max'
+      'soil_type', 'soil_moisture_min', 'soil_moisture_max', 'humidity_min', 'humidity_max', 'temperature_min', 'temperature_max'
     ];
 
     for (const field of requiredFields) {

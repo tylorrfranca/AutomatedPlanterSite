@@ -14,6 +14,8 @@ db.exec(`
     light_min REAL NOT NULL,
     light_max REAL NOT NULL,
     soil_type TEXT NOT NULL,
+    soil_moisture_min REAL NOT NULL,
+    soil_moisture_max REAL NOT NULL,
     humidity_min REAL NOT NULL,
     humidity_max REAL NOT NULL,
     temperature_min REAL NOT NULL,
@@ -32,6 +34,8 @@ const initialPlants = [
     light_min: 50,
     light_max: 200,
     soil_type: 'Well-draining potting mix',
+    soil_moisture_min: 20,
+    soil_moisture_max: 40,
     humidity_min: 30,
     humidity_max: 60,
     temperature_min: 15,
@@ -44,6 +48,8 @@ const initialPlants = [
     light_min: 100,
     light_max: 300,
     soil_type: 'Rich, well-draining soil',
+    soil_moisture_min: 40,
+    soil_moisture_max: 70,
     humidity_min: 50,
     humidity_max: 80,
     temperature_min: 18,
@@ -56,6 +62,8 @@ const initialPlants = [
     light_min: 100,
     light_max: 400,
     soil_type: 'Well-draining potting soil',
+    soil_moisture_min: 30,
+    soil_moisture_max: 60,
     humidity_min: 40,
     humidity_max: 70,
     temperature_min: 15,
@@ -68,6 +76,8 @@ const initialPlants = [
     light_min: 50,
     light_max: 300,
     soil_type: 'Well-draining potting mix',
+    soil_moisture_min: 30,
+    soil_moisture_max: 60,
     humidity_min: 40,
     humidity_max: 70,
     temperature_min: 18,
@@ -80,6 +90,8 @@ const initialPlants = [
     light_min: 200,
     light_max: 500,
     soil_type: 'Rich, well-draining soil',
+    soil_moisture_min: 40,
+    soil_moisture_max: 70,
     humidity_min: 60,
     humidity_max: 80,
     temperature_min: 20,
@@ -92,6 +104,8 @@ const initialPlants = [
     light_min: 50,
     light_max: 200,
     soil_type: 'Well-draining potting mix',
+    soil_moisture_min: 20,
+    soil_moisture_max: 40,
     humidity_min: 30,
     humidity_max: 60,
     temperature_min: 15,
@@ -104,6 +118,8 @@ const initialPlants = [
     light_min: 200,
     light_max: 500,
     soil_type: 'Well-draining potting soil',
+    soil_moisture_min: 30,
+    soil_moisture_max: 60,
     humidity_min: 50,
     humidity_max: 70,
     temperature_min: 18,
@@ -116,6 +132,8 @@ const initialPlants = [
     light_min: 200,
     light_max: 600,
     soil_type: 'Cactus/succulent mix',
+    soil_moisture_min: 10,
+    soil_moisture_max: 30,
     humidity_min: 30,
     humidity_max: 50,
     temperature_min: 15,
@@ -128,6 +146,8 @@ const initialPlants = [
     light_min: 50,
     light_max: 200,
     soil_type: 'Well-draining potting mix',
+    soil_moisture_min: 30,
+    soil_moisture_max: 60,
     humidity_min: 40,
     humidity_max: 70,
     temperature_min: 18,
@@ -140,6 +160,8 @@ const initialPlants = [
     light_min: 100,
     light_max: 400,
     soil_type: 'Rich, well-draining soil',
+    soil_moisture_min: 40,
+    soil_moisture_max: 70,
     humidity_min: 50,
     humidity_max: 80,
     temperature_min: 18,
@@ -153,8 +175,8 @@ if (plantCount.count === 0) {
   const insertPlant = db.prepare(`
     INSERT INTO plants (
       name, water_amount, watering_frequency, light_min, light_max, 
-      soil_type, humidity_min, humidity_max, temperature_min, temperature_max
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      soil_type, soil_moisture_min, soil_moisture_max, humidity_min, humidity_max, temperature_min, temperature_max
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   
   initialPlants.forEach(plant => {
@@ -165,6 +187,8 @@ if (plantCount.count === 0) {
       plant.light_min,
       plant.light_max,
       plant.soil_type,
+      plant.soil_moisture_min,
+      plant.soil_moisture_max,
       plant.humidity_min,
       plant.humidity_max,
       plant.temperature_min,
@@ -181,6 +205,8 @@ export interface Plant {
   light_min: number;
   light_max: number;
   soil_type: string;
+  soil_moisture_min: number;
+  soil_moisture_max: number;
   humidity_min: number;
   humidity_max: number;
   temperature_min: number;
@@ -196,6 +222,8 @@ export interface CreatePlantData {
   light_min: number;
   light_max: number;
   soil_type: string;
+  soil_moisture_min: number;
+  soil_moisture_max: number;
   humidity_min: number;
   humidity_max: number;
   temperature_min: number;
@@ -215,8 +243,8 @@ export const plantDb = {
     const stmt = db.prepare(`
       INSERT INTO plants (
         name, water_amount, watering_frequency, light_min, light_max, 
-        soil_type, humidity_min, humidity_max, temperature_min, temperature_max
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        soil_type, soil_moisture_min, soil_moisture_max, humidity_min, humidity_max, temperature_min, temperature_max
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     const result = stmt.run(
@@ -226,6 +254,8 @@ export const plantDb = {
       plantData.light_min,
       plantData.light_max,
       plantData.soil_type,
+      plantData.soil_moisture_min,
+      plantData.soil_moisture_max,
       plantData.humidity_min,
       plantData.humidity_max,
       plantData.temperature_min,

@@ -14,6 +14,7 @@ A modern web application for intelligent plant care management with SQLite datab
   - Watering frequency (days)
   - Light requirements (min/max lux)
   - Soil type preferences
+  - Soil moisture requirements (min/max %)
   - Humidity requirements (min/max %)
   - Temperature requirements (min/max °C)
 
@@ -83,6 +84,8 @@ interface Plant {
   light_min: number;          // lux
   light_max: number;          // lux
   soil_type: string;
+  soil_moisture_min: number;  // %
+  soil_moisture_max: number;  // %
   humidity_min: number;       // %
   humidity_max: number;       // %
   temperature_min: number;    // °C
@@ -107,6 +110,7 @@ interface Plant {
    - Watering frequency (days)
    - Light requirements (min/max lux)
    - Soil type
+   - Soil moisture requirements (min/max %)
    - Humidity requirements (min/max %)
    - Temperature requirements (min/max °C)
 4. Click "Add Plant"
@@ -160,6 +164,8 @@ CREATE TABLE plants (
   light_min REAL NOT NULL,
   light_max REAL NOT NULL,
   soil_type TEXT NOT NULL,
+  soil_moisture_min REAL NOT NULL,
+  soil_moisture_max REAL NOT NULL,
   humidity_min REAL NOT NULL,
   humidity_max REAL NOT NULL,
   temperature_min REAL NOT NULL,
