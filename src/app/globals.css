@@ -30,3 +30,13 @@
         --dvh: 100dvh;
     }
 }
+
+/* Flashing animation for low water level warning */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}

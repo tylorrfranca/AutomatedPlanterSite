@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['better-sqlite3']
+  serverExternalPackages: ['better-sqlite3'],
+  // Configure for local network access and custom domain
+  async rewrites() {
+    return [
+      // Allow sproutly.com to work locally (you'll need to add this to your hosts file)
+      // 127.0.0.1 sproutly.com
+      // Or use localhost for development
+    ];
   },
   // Optimize for Raspberry Pi 5 deployment
   output: 'standalone',
