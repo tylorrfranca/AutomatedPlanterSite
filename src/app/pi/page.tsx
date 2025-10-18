@@ -57,21 +57,21 @@ function SensorBar({
   }
 
   return (
-    <VStack gap="3" alignItems="center" style={{ minWidth: '140px', height: '400px', justifyContent: 'flex-start' }}>
-      <Text size="3" weight="medium" style={{ color: '#374151', fontSize: '16px' }}>
+    <VStack gap="1" alignItems="center" style={{ minWidth: '110px', height: '300px', justifyContent: 'flex-start' }}>
+      <Text size="2" weight="medium" style={{ color: '#374151', fontSize: '14px' }}>
         {label}
       </Text>
       
       <Box
         position="relative"
-        width="80px"
-        height="280px"
+        width="70px"
+        height="220px"
         bg="gray.100"
-        borderRadius="12px"
-        border="3px solid"
+        borderRadius="10px"
+        border="2px solid"
         borderColor="gray.300"
         overflow="hidden"
-        style={{ boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}
+        style={{ boxShadow: '0 3px 6px rgba(0, 0, 0, 0.1)' }}
       >
         {/* Water level markers */}
         {waterLevels && (
@@ -189,18 +189,18 @@ function SensorBar({
         />
       </Box>
       
-      <Text size="2" style={{ color: '#6b7280', fontSize: '14px' }}>
+      <Text size="1" style={{ color: '#6b7280', fontSize: '12px' }}>
         {value.toFixed(1)}{unit}
       </Text>
       
       {/* Water level status or placeholder for alignment */}
       {waterLevels ? (
         <Text 
-          size="2" 
+          size="1" 
           style={{ 
             color: isBelowThreshold ? '#dc2626' : '#16a34a',
             fontWeight: '600',
-            fontSize: '12px'
+            fontSize: '11px'
           }}
         >
           {sensorLevels?.level_75 ? 'High' : 
@@ -209,11 +209,11 @@ function SensorBar({
         </Text>
       ) : (
         <Text 
-          size="2" 
+          size="1" 
           style={{ 
             color: 'transparent',
-            fontSize: '12px',
-            height: '16px'
+            fontSize: '11px',
+            height: '14px'
           }}
         >
           &nbsp;
@@ -296,9 +296,10 @@ export default function PiDisplay() {
 
   return (
     <Box
-      minH="100vh"
+      height="100vh"
       bg="white"
       position="relative"
+      overflow="hidden"
       style={{
         transition: 'background-color 1s ease'
       }}
@@ -306,16 +307,16 @@ export default function PiDisplay() {
       {/* Sproutly Logo in top left */}
       <Box
         position="absolute"
-        top="20px"
-        left="20px"
+        top="10px"
+        left="10px"
         zIndex="10"
       >
         <img 
           src="/SproutlyLogoDesign.png" 
           alt="Sproutly Logo" 
           style={{
-            width: "100px",
-            height: "100px",
+            width: "80px",
+            height: "80px",
           }}
         />
       </Box>
@@ -323,11 +324,11 @@ export default function PiDisplay() {
       {/* Plant Name */}
       <Box
         position="absolute"
-        top="30px"
-        left="140px"
+        top="15px"
+        left="100px"
         zIndex="10"
       >
-        <Heading size="6" style={{ color: '#15803d', fontSize: '24px' }}>
+        <Heading size="5" style={{ color: '#15803d', fontSize: '20px' }}>
           Plant Name
         </Heading>
       </Box>
@@ -335,15 +336,15 @@ export default function PiDisplay() {
       {/* Main sensor display */}
       <Container
         maxW="full"
-        py="8"
-        px="8"
+        py="1"
+        px="4"
         display="flex"
         alignItems="center"
         justifyContent="center"
-        minH="100vh"
-        pt="140px"
+        height="100vh"
+        pt="90px"
       >
-        <HStack gap="16" alignItems="center" flexWrap="wrap" justify="center" style={{ paddingTop: '60px' }}>
+        <HStack gap="10" alignItems="center" flexWrap="wrap" justify="center" style={{ paddingTop: '10px' }}>
           
           {/* Water Level Sensor */}
           <SensorBar
