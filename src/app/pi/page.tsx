@@ -42,8 +42,22 @@ function SensorBar({
   const percentage = (value / maxValue) * 100;
   const isBelowThreshold = waterLevels && value < 25;
 
+  // Calculate threshold positions for non-water sensors
+  const minThresholdPosition = goodZone && !waterLevels ? 100 - ((goodZone.min / maxValue) * 100) : 0;
+  const maxThresholdPosition = goodZone && !waterLevels ? 100 - ((goodZone.max / maxValue) * 100) : 0;
+  
+  // Debug logging (can be removed later)
+  if (!waterLevels && goodZone && process.env.NODE_ENV === 'development') {
+    console.log(`${label} thresholds:`, {
+      minPosition: minThresholdPosition,
+      maxPosition: maxThresholdPosition,
+      goodZone,
+      maxValue
+    });
+  }
+
   return (
-    <VStack gap="3" alignItems="center" style={{ minWidth: '140px' }}>
+    <VStack gap="3" alignItems="center" style={{ minWidth: '140px', height: '400px', justifyContent: 'flex-start' }}>
       <Text size="3" weight="medium" style={{ color: '#374151', fontSize: '16px' }}>
         {label}
       </Text>
@@ -126,23 +140,35 @@ function SensorBar({
         {/* Good zone indicators for non-water sensors */}
         {!waterLevels && goodZone && (
           <>
-            <Box
-              position="absolute"
-              left="0"
-              right="0"
-              height="2px"
-              top={`${((maxValue - goodZone.max) / maxValue) * 100}%`}
-              bg="black"
-              zIndex="2"
+            <div
+              style={{ 
+                position: 'absolute',
+                left: '-2px',
+                right: '-2px',
+                height: '8px',
+                top: `${Math.min(minThresholdPosition, maxThresholdPosition)}%`,
+                backgroundColor: 'black',
+                border: '2px solid white',
+                borderRadius: '4px',
+                zIndex: 20,
+                display: 'block',
+                boxShadow: '0 0 4px rgba(0,0,0,0.5)'
+              }}
             />
-            <Box
-              position="absolute"
-              left="0"
-              right="0"
-              height="2px"
-              top={`${((maxValue - goodZone.min) / maxValue) * 100}%`}
-              bg="black"
-              zIndex="2"
+            <div
+              style={{ 
+                position: 'absolute',
+                left: '-2px',
+                right: '-2px',
+                height: '8px',
+                top: `${Math.max(minThresholdPosition, maxThresholdPosition)}%`,
+                backgroundColor: 'black',
+                border: '2px solid white',
+                borderRadius: '4px',
+                zIndex: 20,
+                display: 'block',
+                boxShadow: '0 0 4px rgba(0,0,0,0.5)'
+              }}
             />
           </>
         )}
@@ -154,6 +180,7 @@ function SensorBar({
           left="0"
           right="0"
           height={`${Math.min(percentage, 100)}%`}
+          zIndex="1"
           style={{
             background: color.includes('gradient') ? color : undefined,
             backgroundColor: !color.includes('gradient') ? color : undefined,
@@ -166,8 +193,8 @@ function SensorBar({
         {value.toFixed(1)}{unit}
       </Text>
       
-      {/* Water level status */}
-      {waterLevels && (
+      {/* Water level status or placeholder for alignment */}
+      {waterLevels ? (
         <Text 
           size="2" 
           style={{ 
@@ -179,6 +206,17 @@ function SensorBar({
           {sensorLevels?.level_75 ? 'High' : 
            sensorLevels?.level_50 ? 'Medium' : 
            sensorLevels?.level_25 ? 'Low' : 'Critical'}
+        </Text>
+      ) : (
+        <Text 
+          size="2" 
+          style={{ 
+            color: 'transparent',
+            fontSize: '12px',
+            height: '16px'
+          }}
+        >
+          &nbsp;
         </Text>
       )}
     </VStack>
@@ -305,7 +343,7 @@ export default function PiDisplay() {
         minH="100vh"
         pt="140px"
       >
-        <HStack gap="16" alignItems="end" flexWrap="wrap" justify="center" style={{ paddingTop: '60px' }}>
+        <HStack gap="16" alignItems="center" flexWrap="wrap" justify="center" style={{ paddingTop: '60px' }}>
           
           {/* Water Level Sensor */}
           <SensorBar
@@ -325,7 +363,7 @@ export default function PiDisplay() {
             maxValue={100}
             unit="%"
             color="linear-gradient(to top, #fbbf24, #f59e0b, #d97706)"
-            goodZone={{ min: 30, max: 70 }}
+            goodZone={{ min: 35, max: 65 }}
           />
 
           {/* Temperature Sensor */}
@@ -335,7 +373,7 @@ export default function PiDisplay() {
             maxValue={50}
             unit="°C"
             color="linear-gradient(to top, #dc2626, #ef4444, #f87171)"
-            goodZone={{ min: 18, max: 28 }}
+            goodZone={{ min: 17.5, max: 32.5 }}
           />
 
           {/* Humidity Sensor */}
@@ -345,7 +383,7 @@ export default function PiDisplay() {
             maxValue={100}
             unit="%"
             color="linear-gradient(to top, #1e3a8a, #3b82f6, #60a5fa)"
-            goodZone={{ min: 40, max: 70 }}
+            goodZone={{ min: 35, max: 65 }}
           />
 
           {/* Moisture Sensor */}
@@ -355,7 +393,7 @@ export default function PiDisplay() {
             maxValue={100}
             unit="%"
             color="linear-gradient(to top, #16a34a, #22c55e, #4ade80)"
-            goodZone={{ min: 30, max: 60 }}
+            goodZone={{ min: 35, max: 65 }}
           />
         </HStack>
       </Container>
@@ -368,7 +406,7 @@ export default function PiDisplay() {
           left="0"
           right="0"
           bottom="0"
-          bg="rgba(220, 38, 38, 0.1)"
+          bg="rgba(220, 38, 38, 0.25)"
           pointerEvents="none"
           zIndex="5"
           animation="pulse 1s infinite"

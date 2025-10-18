@@ -1,6 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['better-sqlite3'],
+  experimental: {
+    // Configure Turbopack for development
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+    },
+  },
   // Configure for local network access and custom domain
   async rewrites() {
     return [
@@ -12,41 +23,42 @@ const nextConfig = {
   // Optimize for Raspberry Pi 5 deployment
   output: 'standalone',
   poweredByHeader: false,
-  webpack: (config, { isServer, dev }) => {
-    if (isServer) {
+  webpack: (config, { isServer, dev, nextRuntime }) => {
+    // Only apply webpack config when not using Turbopack
+    if (nextRuntime === 'nodejs' && isServer) {
       config.externals.push('better-sqlite3');
     }
     
     // Fix chunk loading timeout issues
-    if (dev) {
+    if (dev && !process.env.TURBOPACK) {
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
         ignored: ['**/node_modules/**'],
       };
-    }
-    
-    // Increase timeout for chunk loading and add retry logic
-    config.output = {
-      ...config.output,
-      chunkLoadTimeout: 120000, // 2 minutes
-    };
-    
-    // Add optimization for chunk loading
-    config.optimization = {
-      ...config.optimization,
-      splitChunks: {
-        ...config.optimization.splitChunks,
-        cacheGroups: {
-          ...config.optimization.splitChunks?.cacheGroups,
-          default: {
-            minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
+      
+      // Increase timeout for chunk loading and add retry logic
+      config.output = {
+        ...config.output,
+        chunkLoadTimeout: 120000, // 2 minutes
+      };
+      
+      // Add optimization for chunk loading
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          ...config.optimization.splitChunks,
+          cacheGroups: {
+            ...config.optimization.splitChunks?.cacheGroups,
+            default: {
+              minChunks: 2,
+              priority: -20,
+              reuseExistingChunk: true,
+            },
           },
         },
-      },
-    };
+      };
+    }
     
     return config;
   },

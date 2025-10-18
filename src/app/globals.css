@@ -34,9 +34,9 @@
 /* Flashing animation for low water level warning */
 @keyframes pulse {
     0%, 100% {
-        opacity: 0.8;
+        opacity: 0.7;
     }
     50% {
-        opacity: 0.4;
+        opacity: 0.3;
     }
 }
