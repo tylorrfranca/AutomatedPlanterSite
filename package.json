@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "prepare": "panda codegen",
-    "dev": "panda codegen && next dev",
+    "dev": "panda codegen && next dev --turbo",
+    "dev:fallback": "panda codegen && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "clean": "rm -rf .next",
     "prettier:format": "prettier --write \"**/*.{ts,tsx,js,md,mdx,css,yaml}\"",
     "prettier:check": "prettier --check \"**/*.{ts,tsx,js,md,mdx,css,yaml}\""
   },
