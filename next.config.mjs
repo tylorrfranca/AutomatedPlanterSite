@@ -3,6 +3,9 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['better-sqlite3']
   },
+  // Optimize for Raspberry Pi 5 deployment
+  output: 'standalone',
+  poweredByHeader: false,
   webpack: (config, { isServer, dev }) => {
     if (isServer) {
       config.externals.push('better-sqlite3');
