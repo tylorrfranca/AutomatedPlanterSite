@@ -66,74 +66,41 @@ function SensorBar({
         position="relative"
         width="100px"
         height="470px"
-        bg="gray.100"
+        bg="white"
         borderRadius="10px"
-        border="2px solid"
-        borderColor="gray.300"
         overflow="hidden"
         style={{ boxShadow: '0 3px 6px rgba(0, 0, 0, 0.1)' }}
       >
         {/* Water level markers */}
         {waterLevels && (
           <>
-            <Box
-              position="absolute"
-              left="0"
-              right="0"
-              height="2px"
-              top="25%"
-              bg="blue.500"
-              zIndex="2"
-            />
-            <Box
-              position="absolute"
-              left="0"
-              right="0"
-              height="2px"
-              top="50%"
-              bg="blue.500"
-              zIndex="2"
-            />
-            <Box
-              position="absolute"
-              left="0"
-              right="0"
-              height="2px"
-              top="75%"
-              bg="blue.500"
-              zIndex="2"
-            />
-            {/* Water level indicator lines */}
-            <Box
-              position="absolute"
-              left="-40px"
-              top="20%"
-              fontSize="12px"
-              color="blue.600"
-              fontWeight="600"
-            >
-              75
-            </Box>
-            <Box
-              position="absolute"
-              left="-40px"
-              top="45%"
-              fontSize="12px"
-              color="blue.600"
-              fontWeight="600"
-            >
-              50
-            </Box>
-            <Box
-              position="absolute"
-              left="-40px"
-              top="70%"
-              fontSize="12px"
-              color="blue.600"
-              fontWeight="600"
-            >
-              25
-            </Box>
+                <Box
+                  position="absolute"
+                  left="0"
+                  right="0"
+                  height="2px"
+                  top="25%"
+                  bg="black"
+                  zIndex="2"
+                />
+                <Box
+                  position="absolute"
+                  left="0"
+                  right="0"
+                  height="2px"
+                  top="50%"
+                  bg="black"
+                  zIndex="2"
+                />
+                <Box
+                  position="absolute"
+                  left="0"
+                  right="0"
+                  height="2px"
+                  top="75%"
+                  bg="black"
+                  zIndex="2"
+                />
           </>
         )}
 
@@ -337,56 +304,56 @@ export default function PiDisplay() {
       >
         <HStack gap="20" alignItems="center" flexWrap="wrap" justify="center" style={{ paddingTop: '0px' }}>
           
-          {/* Water Level Sensor */}
-          <SensorBar
-            label="Water"
-            value={sensorData.water_level}
-            maxValue={100}
-            unit="%"
-            color="linear-gradient(to top, #1e40af, #3b82f6, #60a5fa)"
-            waterLevels={true}
-            sensorLevels={sensorData.water_sensors}
-          />
+              {/* Water Level Sensor */}
+              <SensorBar
+                label="Water"
+                value={sensorData.water_level}
+                maxValue={100}
+                unit="%"
+                color="blue"
+                waterLevels={true}
+                sensorLevels={sensorData.water_sensors}
+              />
 
-          {/* Light Sensor */}
-          <SensorBar
-            label="Light"
-            value={sensorData.light_level}
-            maxValue={100}
-            unit="%"
-            color="linear-gradient(to top, #fbbf24, #f59e0b, #d97706)"
-            goodZone={{ min: 35, max: 65 }}
-          />
+              {/* Light Sensor */}
+              <SensorBar
+                label="Light"
+                value={sensorData.light_level}
+                maxValue={100}
+                unit="%"
+                color="#B8860B"
+                goodZone={{ min: 35, max: 65 }}
+              />
 
-          {/* Temperature Sensor */}
-          <SensorBar
-            label="Temp"
-            value={sensorData.temperature}
-            maxValue={50}
-            unit="°C"
-            color="linear-gradient(to top, #dc2626, #ef4444, #f87171)"
-            goodZone={{ min: 17.5, max: 32.5 }}
-          />
+              {/* Temperature Sensor */}
+              <SensorBar
+                label="Temp"
+                value={sensorData.temperature}
+                maxValue={50}
+                unit="°C"
+                color="red"
+                goodZone={{ min: 17.5, max: 32.5 }}
+              />
 
-          {/* Humidity Sensor */}
-          <SensorBar
-            label="Humidity"
-            value={sensorData.humidity}
-            maxValue={100}
-            unit="%"
-            color="linear-gradient(to top, #1e3a8a, #3b82f6, #60a5fa)"
-            goodZone={{ min: 35, max: 65 }}
-          />
+              {/* Humidity Sensor */}
+              <SensorBar
+                label="Humidity"
+                value={sensorData.humidity}
+                maxValue={100}
+                unit="%"
+                color="gray"
+                goodZone={{ min: 35, max: 65 }}
+              />
 
-          {/* Moisture Sensor */}
-          <SensorBar
-            label="Moisture"
-            value={sensorData.moisture}
-            maxValue={100}
-            unit="%"
-            color="linear-gradient(to top, #16a34a, #22c55e, #4ade80)"
-            goodZone={{ min: 35, max: 65 }}
-          />
+              {/* Moisture Sensor */}
+              <SensorBar
+                label="Moisture"
+                value={sensorData.moisture}
+                maxValue={100}
+                unit="%"
+                color="#8B4513"
+                goodZone={{ min: 35, max: 65 }}
+              />
         </HStack>
       </Container>
 
