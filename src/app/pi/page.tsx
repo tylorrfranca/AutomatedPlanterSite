@@ -335,8 +335,8 @@ export default function PiDisplay() {
           src="/SproutlyLogoDesign.png" 
           alt="Sproutly Logo" 
           style={{
-            width: "140px",
-            height: "140px",
+            width: "180px",
+            height: "180px",
           }}
         />
         
@@ -346,10 +346,14 @@ export default function PiDisplay() {
           weight="bold" 
           style={{ 
             color: '#166534', 
-            fontSize: '22px',
-            marginTop: '20px',
+            fontSize: plantName.length > 15 ? '26px' : '32px',
+            marginTop: '24px',
             textAlign: 'center',
-            fontWeight: '700'
+            fontWeight: '700',
+            lineHeight: '1.2',
+            paddingLeft: '8px',
+            paddingRight: '8px',
+            wordBreak: 'break-word'
           }}
         >
           {plantName}
@@ -361,10 +365,12 @@ export default function PiDisplay() {
             size="2" 
             style={{ 
               color: '#16a34a', 
-              fontSize: '13px',
-              marginTop: '12px',
+              fontSize: '16px',
+              marginTop: '16px',
               textAlign: 'center',
-              fontWeight: '500'
+              fontWeight: '600',
+              paddingLeft: '8px',
+              paddingRight: '8px'
             }}
           >
             Last updated: {new Date(sensorData.timestamp).toLocaleTimeString()}
