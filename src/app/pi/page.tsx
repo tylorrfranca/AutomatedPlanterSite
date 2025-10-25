@@ -72,7 +72,28 @@ function SensorBar({
         overflow="hidden"
         style={{ 
           boxShadow: '0 3px 6px rgba(0, 0, 0, 0.1)',
-          border: '2px solid #e5e7eb'
+          border: '2px solid #e5e7eb',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease'
+        }}
+        onClick={() => {
+          const sensorMap: { [key: string]: string } = {
+            'Water': 'water',
+            'Light': 'light',
+            'Temp': 'temp',
+            'Humidity': 'humidity',
+            'Moisture': 'moisture'
+          };
+          const sensor = sensorMap[label] || 'water';
+          window.location.href = `/pi/history/${sensor}`;
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-5px)';
+          e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.15)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 3px 6px rgba(0, 0, 0, 0.1)';
         }}
       >
         {/* Water level markers */}
