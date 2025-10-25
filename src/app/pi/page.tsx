@@ -213,6 +213,7 @@ export default function PiDisplay() {
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
   const [loading, setLoading] = useState(true);
   const [flashing, setFlashing] = useState(false);
+  const [plantName, setPlantName] = useState<string>('My Plant');
 
   const fetchSensorData = async () => {
     try {
@@ -229,8 +230,22 @@ export default function PiDisplay() {
     }
   };
 
+  const fetchPlantName = async () => {
+    try {
+      const response = await fetch('/api/plants');
+      const data = await response.json();
+      if (data && data.length > 0) {
+        // Get the first plant's name (or you can match by ID if you track which plant is being monitored)
+        setPlantName(data[0].name);
+      }
+    } catch (error) {
+      console.error('Error fetching plant data:', error);
+    }
+  };
+
   useEffect(() => {
     fetchSensorData();
+    fetchPlantName();
     setLoading(false);
     
     // Fetch sensor data every 5 seconds for real-time updates
@@ -290,13 +305,16 @@ export default function PiDisplay() {
         transition: 'background-color 1s ease'
       }}
     >
-      {/* Sproutly Logo in top left */}
+      {/* Sproutly Logo with plant name and timestamp */}
       <Box
         position="absolute"
         top="10px"
         left="-20px"
         zIndex="10"
         padding="20px"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
       >
         <img 
           src="/SproutlyLogoDesign.png" 
@@ -306,6 +324,33 @@ export default function PiDisplay() {
             height: "160px",
           }}
         />
+        {/* Plant Name */}
+        <Text 
+          size="4" 
+          weight="bold" 
+          style={{ 
+            color: '#1f2937', 
+            fontSize: '20px',
+            marginTop: '8px',
+            textAlign: 'center'
+          }}
+        >
+          {plantName}
+        </Text>
+        {/* Last Updated Timestamp */}
+        {sensorData && (
+          <Text 
+            size="2" 
+            style={{ 
+              color: '#6b7280', 
+              fontSize: '12px',
+              marginTop: '4px',
+              textAlign: 'center'
+            }}
+          >
+            Last updated: {new Date(sensorData.timestamp).toLocaleTimeString()}
+          </Text>
+        )}
       </Box>
 
 
@@ -394,26 +439,7 @@ export default function PiDisplay() {
         />
       )}
 
-      {/* Timestamp at bottom */}
-      {sensorData && (
-        <Box
-          position="absolute"
-          bottom="20px"
-          left="50%"
-          transform="translateX(-50%)"
-          bg="rgba(255, 255, 255, 0.9)"
-          px="4"
-          py="2"
-          borderRadius="8"
-          style={{
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-          }}
-        >
-          <Text size="2" style={{ color: '#6b7280', fontSize: '14px' }}>
-            Last updated: {new Date(sensorData.timestamp).toLocaleTimeString()}
-          </Text>
-        </Box>
-      )}
+
     </Box>
   );
 }
