@@ -310,58 +310,99 @@ export default function PiDisplay() {
     <Box
       height="100vh"
       bg="white"
+      display="flex"
       position="relative"
       overflow="hidden"
       style={{
         transition: 'background-color 1s ease'
       }}
     >
-      {/* Sproutly Logo with plant name and timestamp */}
+      {/* Left Sidebar */}
       <Box
-        position="absolute"
-        top="10px"
-        left="-20px"
-        zIndex="10"
-        padding="20px"
+        width="250px"
+        bg="#f0fdf4"
+        borderRight="2px solid #bbf7d0"
         display="flex"
         flexDirection="column"
         alignItems="center"
+        justifyContent="flex-start"
+        paddingTop="30px"
+        paddingX="20px"
+        position="relative"
       >
+        {/* Sproutly Logo */}
         <img 
           src="/SproutlyLogoDesign.png" 
           alt="Sproutly Logo" 
           style={{
-            width: "160px",
-            height: "160px",
+            width: "140px",
+            height: "140px",
           }}
         />
+        
         {/* Plant Name */}
         <Text 
           size="4" 
           weight="bold" 
           style={{ 
-            color: '#1f2937', 
-            fontSize: '20px',
-            marginTop: '8px',
-            textAlign: 'center'
+            color: '#166534', 
+            fontSize: '22px',
+            marginTop: '20px',
+            textAlign: 'center',
+            fontWeight: '700'
           }}
         >
           {plantName}
         </Text>
+        
         {/* Last Updated Timestamp */}
         {sensorData && (
           <Text 
             size="2" 
             style={{ 
-              color: '#6b7280', 
-              fontSize: '12px',
-              marginTop: '4px',
-              textAlign: 'center'
+              color: '#16a34a', 
+              fontSize: '13px',
+              marginTop: '12px',
+              textAlign: 'center',
+              fontWeight: '500'
             }}
           >
             Last updated: {new Date(sensorData.timestamp).toLocaleTimeString()}
           </Text>
         )}
+        
+        {/* Select/Modify Plant Button */}
+        <Box
+          position="absolute"
+          bottom="30px"
+          width="calc(100% - 40px)"
+        >
+          <Button
+            variant="outline"
+            onClick={() => router.push('/plants')}
+            style={{ 
+              cursor: 'pointer',
+              backgroundColor: 'white',
+              borderColor: '#16a34a',
+              color: '#166534',
+              fontWeight: '600',
+              padding: '12px 24px',
+              fontSize: '14px',
+              width: '100%',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#dcfce7';
+              e.currentTarget.style.borderColor = '#22c55e';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'white';
+              e.currentTarget.style.borderColor = '#16a34a';
+            }}
+          >
+            Select/Modify Plant
+          </Button>
+        </Box>
       </Box>
 
 
@@ -374,8 +415,7 @@ export default function PiDisplay() {
         alignItems="center"
         justifyContent="center"
         height="100vh"
-        pt="80px"
-        pb="15px"
+        flex="1"
       >
         <HStack gap="20" alignItems="center" flexWrap="wrap" justify="center" style={{ paddingTop: '0px' }}>
           
@@ -450,30 +490,6 @@ export default function PiDisplay() {
         />
       )}
 
-      {/* Change Plant Button - Bottom Left */}
-      <Box
-        position="absolute"
-        bottom="20px"
-        left="20px"
-        zIndex="10"
-      >
-        <Button
-          variant="outline"
-          onClick={() => router.push('/plants')}
-          style={{ 
-            cursor: 'pointer',
-            backgroundColor: 'white',
-            borderColor: '#e5e7eb',
-            color: '#374151',
-            fontWeight: '500',
-            padding: '12px 24px',
-            fontSize: '14px'
-          }}
-        >
-          Change Plant
-        </Button>
-      </Box>
- 
     </Box>
   );
 }
