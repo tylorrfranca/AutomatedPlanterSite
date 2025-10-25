@@ -151,6 +151,15 @@ export default function PlantManager() {
     }
   };
 
+  const handleSelectPlant = async (plant: Plant) => {
+    // Store selected plant in localStorage for PI page to read
+    localStorage.setItem('selectedPlantId', plant.id.toString());
+    localStorage.setItem('selectedPlantName', plant.name);
+    
+    // Navigate to PI interface to monitor this plant
+    router.push('/pi');
+  };
+
   if (loading) {
     return (
       <Container maxW="7xl" py="8" px="8">
@@ -429,25 +438,41 @@ export default function PlantManager() {
                   </HStack>
                 </VStack>
 
-                <HStack gap="2" style={{ width: '100%' }}>
+                <VStack gap="2" style={{ width: '100%' }}>
                   <Button 
                     size="2" 
-                    variant="outline"
-                    onClick={() => handleEdit(plant)}
-                    style={{ flex: 1 }}
+                    color="green"
+                    onClick={() => handleSelectPlant(plant)}
+                    style={{ 
+                      width: '100%',
+                      background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                      border: 'none',
+                      color: 'white',
+                      fontWeight: '600'
+                    }}
                   >
-                    Edit
+                    Select Plant
                   </Button>
-                  <Button 
-                    size="2" 
-                    color="red" 
-                    variant="outline"
-                    onClick={() => handleDelete(plant.id)}
-                    style={{ flex: 1 }}
-                  >
-                    Delete
-                  </Button>
-                </HStack>
+                  <HStack gap="2" style={{ width: '100%' }}>
+                    <Button 
+                      size="2" 
+                      variant="outline"
+                      onClick={() => handleEdit(plant)}
+                      style={{ flex: 1 }}
+                    >
+                      Edit
+                    </Button>
+                    <Button 
+                      size="2" 
+                      color="red" 
+                      variant="outline"
+                      onClick={() => handleDelete(plant.id)}
+                      style={{ flex: 1 }}
+                    >
+                      Delete
+                    </Button>
+                  </HStack>
+                </VStack>
               </VStack>
             </Card>
           ))}

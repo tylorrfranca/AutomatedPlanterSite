@@ -233,11 +233,20 @@ export default function PiDisplay() {
   };
 
   const fetchPlantName = async () => {
+    // First check localStorage for selected plant
+    if (typeof window !== 'undefined') {
+      const selectedPlantName = localStorage.getItem('selectedPlantName');
+      if (selectedPlantName) {
+        setPlantName(selectedPlantName);
+        return;
+      }
+    }
+    
+    // Fallback to fetching from API
     try {
       const response = await fetch('/api/plants');
       const data = await response.json();
       if (data && data.length > 0) {
-        // Get the first plant's name (or you can match by ID if you track which plant is being monitored)
         setPlantName(data[0].name);
       }
     } catch (error) {
