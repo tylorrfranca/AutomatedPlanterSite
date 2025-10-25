@@ -377,11 +377,14 @@ export default function PiDisplay() {
           </Text>
         )}
         
-        {/* Select/Modify Plant Button */}
+        {/* Select Plant and Modify Plant Buttons */}
         <Box
           position="absolute"
           bottom="30px"
           width="calc(100% - 40px)"
+          display="flex"
+          flexDirection="column"
+          gap="12px"
         >
           <Button
             variant="outline"
@@ -407,7 +410,41 @@ export default function PiDisplay() {
               e.currentTarget.style.borderColor = '#16a34a';
             }}
           >
-            Select/Modify Plant
+            Select Plant
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={() => {
+              const selectedPlantId = localStorage.getItem('selectedPlantId');
+              if (selectedPlantId) {
+                router.push(`/plants?edit=${selectedPlantId}`);
+              } else {
+                router.push('/plants');
+              }
+            }}
+            style={{ 
+              cursor: 'pointer',
+              backgroundColor: 'white',
+              borderColor: '#16a34a',
+              color: '#166534',
+              fontWeight: '600',
+              padding: '12px 24px',
+              fontSize: '17px',
+              width: '100%',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#dcfce7';
+              e.currentTarget.style.borderColor = '#22c55e';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'white';
+              e.currentTarget.style.borderColor = '#16a34a';
+            }}
+          >
+            Modify Plant
           </Button>
         </Box>
       </Box>

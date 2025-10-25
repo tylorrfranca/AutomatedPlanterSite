@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { VStack, HStack, Box, Container } from "panda";
 import { Heading, Text, Button, Card, Badge, TextField, Select, TextArea } from "@radix-ui/themes";
 import { Plant, CreatePlantData } from '@/lib/database';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface PlantFormData {
   name: string;
@@ -23,6 +23,7 @@ interface PlantFormData {
 
 export default function PlantManager() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -45,6 +46,33 @@ export default function PlantManager() {
   useEffect(() => {
     fetchPlants();
   }, []);
+
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (editId && plants.length > 0) {
+      const plant = plants.find(p => p.id === parseInt(editId));
+      if (plant) {
+        setEditingPlant(plant);
+        setFormData({
+          name: plant.name,
+          water_amount: plant.water_amount.toString(),
+          watering_frequency: plant.watering_frequency.toString(),
+          light_min: plant.light_min.toString(),
+          light_max: plant.light_max.toString(),
+          soil_type: plant.soil_type,
+          soil_moisture_min: plant.soil_moisture_min.toString(),
+          soil_moisture_max: plant.soil_moisture_max.toString(),
+          humidity_min: plant.humidity_min.toString(),
+          humidity_max: plant.humidity_max.toString(),
+          temperature_min: plant.temperature_min.toString(),
+          temperature_max: plant.temperature_max.toString()
+        });
+        setShowForm(true);
+        // Remove the edit query parameter from URL
+        router.replace('/plants');
+      }
+    }
+  }, [searchParams, plants, router]);
 
   const fetchPlants = async () => {
     try {
@@ -106,16 +134,21 @@ export default function PlantManager() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(plantData)
         });
+        
+        // After updating, navigate back to PI page
+        await fetchPlants();
+        resetForm();
+        router.push('/pi');
       } else {
         await fetch('/api/plants', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(plantData)
         });
+        
+        await fetchPlants();
+        resetForm();
       }
-      
-      await fetchPlants();
-      resetForm();
     } catch (error) {
       console.error('Error saving plant:', error);
     }

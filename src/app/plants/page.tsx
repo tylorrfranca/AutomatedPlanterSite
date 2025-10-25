@@ -3,6 +3,7 @@
 import Navigation from '@/components/Navigation';
 import PlantManager from '@/components/PlantManager';
 import { Box } from "panda";
+import { Suspense } from 'react';
 
 export default function PlantsPage() {
     return (
@@ -20,7 +21,9 @@ export default function PlantsPage() {
             
             <Navigation currentPage="plants" />
             <Box pt="80px" position="relative" zIndex="1">
-                <PlantManager />
+                <Suspense fallback={<div>Loading...</div>}>
+                    <PlantManager />
+                </Suspense>
             </Box>
         </Box>
     );
