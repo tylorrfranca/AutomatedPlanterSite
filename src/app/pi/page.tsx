@@ -42,9 +42,10 @@ function SensorBar({
   const percentage = (value / maxValue) * 100;
   const isBelowThreshold = waterLevels && value < 25;
 
-  // Calculate threshold positions for non-water sensors
-  const minThresholdPosition = goodZone && !waterLevels ? 100 - ((goodZone.min / maxValue) * 100) : 0;
-  const maxThresholdPosition = goodZone && !waterLevels ? 100 - ((goodZone.max / maxValue) * 100) : 0;
+  // Calculate threshold positions for non-water sensors (measured from top)
+  // For goodZone min=35, max=65, we want lines at 35% from bottom (65% from top) and 65% from bottom (35% from top)
+  const minThresholdPosition = goodZone && !waterLevels ? (1 - (goodZone.min / maxValue)) * 100 : 0;
+  const maxThresholdPosition = goodZone && !waterLevels ? (1 - (goodZone.max / maxValue)) * 100 : 0;
   
   // Debug logging (can be removed later)
   if (!waterLevels && goodZone && process.env.NODE_ENV === 'development') {
@@ -66,10 +67,13 @@ function SensorBar({
         position="relative"
         width="100px"
         height="470px"
-        bg="white"
+        bg="#f3f4f6"
         borderRadius="10px"
         overflow="hidden"
-        style={{ boxShadow: '0 3px 6px rgba(0, 0, 0, 0.1)' }}
+        style={{ 
+          boxShadow: '0 3px 6px rgba(0, 0, 0, 0.1)',
+          border: '2px solid #e5e7eb'
+        }}
       >
         {/* Water level markers */}
         {waterLevels && (
@@ -108,55 +112,47 @@ function SensorBar({
         {!waterLevels && goodZone && (
           <>
             <div
-              style={{ 
+              style={{
                 position: 'absolute',
-                left: '-2px',
-                right: '-2px',
-                height: '8px',
+                left: '0',
+                right: '0',
+                height: '2px',
                 top: `${Math.min(minThresholdPosition, maxThresholdPosition)}%`,
                 backgroundColor: 'black',
-                border: '2px solid white',
-                borderRadius: '4px',
-                zIndex: 20,
-                display: 'block',
-                boxShadow: '0 0 4px rgba(0,0,0,0.5)'
+                zIndex: 2
               }}
             />
             <div
-              style={{ 
+              style={{
                 position: 'absolute',
-                left: '-2px',
-                right: '-2px',
-                height: '8px',
+                left: '0',
+                right: '0',
+                height: '2px',
                 top: `${Math.max(minThresholdPosition, maxThresholdPosition)}%`,
                 backgroundColor: 'black',
-                border: '2px solid white',
-                borderRadius: '4px',
-                zIndex: 20,
-                display: 'block',
-                boxShadow: '0 0 4px rgba(0,0,0,0.5)'
+                zIndex: 2
               }}
             />
           </>
         )}
 
         {/* Fill bar */}
-        <Box
-          position="absolute"
-          bottom="0"
-          left="0"
-          right="0"
-          height={`${Math.min(percentage, 100)}%`}
-          zIndex="1"
+        <div
           style={{
-            background: color.includes('gradient') ? color : undefined,
-            backgroundColor: !color.includes('gradient') ? color : undefined,
-            transition: 'height 0.3s ease'
+            position: 'absolute',
+            bottom: '0',
+            left: '0',
+            width: '100%',
+            height: `${Math.min(percentage, 100)}%`,
+            backgroundColor: color,
+            transition: 'height 0.3s ease',
+            borderRadius: percentage >= 99 ? '10px' : '10px 10px 0 0',
+            zIndex: 1
           }}
         />
       </Box>
       
-      <Text size="1" style={{ color: '#6b7280', fontSize: '24px', marginTop: '5px' }}>
+      <Text size="1" style={{ color: '#1f2937', fontSize: '28px', fontWeight: '600', textAlign: 'center', marginTop: '5px' }}>
         {value.toFixed(1)}{unit}
       </Text>
       
@@ -167,7 +163,8 @@ function SensorBar({
           style={{ 
             color: isBelowThreshold ? '#dc2626' : '#16a34a',
             fontWeight: '600',
-            fontSize: '22px'
+            fontSize: '22px',
+            marginTop: '5px'
           }}
         >
           {sensorLevels?.level_75 ? 'High' : 
@@ -180,7 +177,8 @@ function SensorBar({
           style={{ 
             color: 'transparent',
             fontSize: '22px',
-            height: '28px'
+            height: '28px',
+            marginTop: '5px'
           }}
         >
           &nbsp;
@@ -310,7 +308,7 @@ export default function PiDisplay() {
                 value={sensorData.water_level}
                 maxValue={100}
                 unit="%"
-                color="blue"
+                color="#3b82f6"
                 waterLevels={true}
                 sensorLevels={sensorData.water_sensors}
               />
@@ -321,7 +319,7 @@ export default function PiDisplay() {
                 value={sensorData.light_level}
                 maxValue={100}
                 unit="%"
-                color="#B8860B"
+                color="#eab308"
                 goodZone={{ min: 35, max: 65 }}
               />
 
@@ -331,7 +329,7 @@ export default function PiDisplay() {
                 value={sensorData.temperature}
                 maxValue={50}
                 unit="°C"
-                color="red"
+                color="#ef4444"
                 goodZone={{ min: 17.5, max: 32.5 }}
               />
 
@@ -341,7 +339,7 @@ export default function PiDisplay() {
                 value={sensorData.humidity}
                 maxValue={100}
                 unit="%"
-                color="gray"
+                color="#6b7280"
                 goodZone={{ min: 35, max: 65 }}
               />
 
@@ -351,7 +349,7 @@ export default function PiDisplay() {
                 value={sensorData.moisture}
                 maxValue={100}
                 unit="%"
-                color="#8B4513"
+                color="#a855f7"
                 goodZone={{ min: 35, max: 65 }}
               />
         </HStack>
@@ -373,6 +371,27 @@ export default function PiDisplay() {
             animation: 'pulse 1s infinite'
           }}
         />
+      )}
+
+      {/* Timestamp at bottom */}
+      {sensorData && (
+        <Box
+          position="absolute"
+          bottom="20px"
+          left="50%"
+          transform="translateX(-50%)"
+          bg="rgba(255, 255, 255, 0.9)"
+          px="4"
+          py="2"
+          borderRadius="8"
+          style={{
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+          }}
+        >
+          <Text size="2" style={{ color: '#6b7280', fontSize: '14px' }}>
+            Last updated: {new Date(sensorData.timestamp).toLocaleTimeString()}
+          </Text>
+        </Box>
       )}
     </Box>
   );

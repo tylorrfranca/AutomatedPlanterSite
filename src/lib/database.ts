@@ -22,7 +22,22 @@ db.exec(`
     temperature_max REAL NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
+  );
+
+  CREATE TABLE IF NOT EXISTS sensor_readings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    water_level REAL NOT NULL,
+    light_level REAL NOT NULL,
+    temperature REAL NOT NULL,
+    humidity REAL NOT NULL,
+    moisture REAL NOT NULL,
+    water_sensor_75 BOOLEAN NOT NULL DEFAULT 0,
+    water_sensor_50 BOOLEAN NOT NULL DEFAULT 0,
+    water_sensor_25 BOOLEAN NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_sensor_readings_created_at ON sensor_readings(created_at);
 `);
 
 // Insert initial plant data
@@ -230,6 +245,30 @@ export interface CreatePlantData {
   temperature_max: number;
 }
 
+export interface SensorReading {
+  id: number;
+  water_level: number;
+  light_level: number;
+  temperature: number;
+  humidity: number;
+  moisture: number;
+  water_sensor_75: boolean;
+  water_sensor_50: boolean;
+  water_sensor_25: boolean;
+  created_at: string;
+}
+
+export interface CreateSensorReadingData {
+  water_level: number;
+  light_level: number;
+  temperature: number;
+  humidity: number;
+  moisture: number;
+  water_sensor_75: boolean;
+  water_sensor_50: boolean;
+  water_sensor_25: boolean;
+}
+
 export const plantDb = {
   getAll: (): Plant[] => {
     return db.prepare('SELECT * FROM plants ORDER BY name').all() as Plant[];
@@ -293,6 +332,61 @@ export const plantDb = {
   delete: (id: number): boolean => {
     const result = db.prepare('DELETE FROM plants WHERE id = ?').run(id);
     return result.changes > 0;
+  }
+};
+
+export const sensorDb = {
+  // Get the latest sensor reading
+  getLatest: (): SensorReading | undefined => {
+    return db.prepare('SELECT * FROM sensor_readings ORDER BY created_at DESC LIMIT 1').get() as SensorReading | undefined;
+  },
+
+  // Get all readings (with optional limit)
+  getAll: (limit?: number): SensorReading[] => {
+    const limitClause = limit ? `LIMIT ${limit}` : '';
+    return db.prepare(`SELECT * FROM sensor_readings ORDER BY created_at DESC ${limitClause}`).all() as SensorReading[];
+  },
+
+  // Get readings from the last N hours
+  getRecent: (hours: number): SensorReading[] => {
+    return db.prepare(`
+      SELECT * FROM sensor_readings 
+      WHERE created_at >= datetime('now', '-' || ? || ' hours')
+      ORDER BY created_at DESC
+    `).all(hours) as SensorReading[];
+  },
+
+  // Create a new sensor reading
+  create: (data: CreateSensorReadingData): SensorReading => {
+    const stmt = db.prepare(`
+      INSERT INTO sensor_readings (
+        water_level, light_level, temperature, humidity, moisture,
+        water_sensor_75, water_sensor_50, water_sensor_25
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    const result = stmt.run(
+      data.water_level,
+      data.light_level,
+      data.temperature,
+      data.humidity,
+      data.moisture,
+      data.water_sensor_75 ? 1 : 0,
+      data.water_sensor_50 ? 1 : 0,
+      data.water_sensor_25 ? 1 : 0
+    );
+    
+    return db.prepare('SELECT * FROM sensor_readings WHERE id = ?').get(result.lastInsertRowid) as SensorReading;
+  },
+
+  // Delete old readings (keep last N days)
+  cleanup: (daysToKeep: number = 30): number => {
+    const result = db.prepare(`
+      DELETE FROM sensor_readings 
+      WHERE created_at < datetime('now', '-' || ? || ' days')
+    `).run(daysToKeep);
+    
+    return result.changes;
   }
 };
 

@@ -18,6 +18,18 @@ A modern web application for intelligent plant care management with SQLite datab
   - Humidity requirements (min/max %)
   - Temperature requirements (min/max °C)
 
+### 📊 Real-Time Sensor Data
+- **Raspberry Pi Integration**: Ready to receive sensor data from hardware
+- **Live Sensor Display**: Real-time visualization of:
+  - Water level (0-100%)
+  - Light intensity (0-100%)
+  - Temperature (°C)
+  - Humidity (0-100%)
+  - Soil moisture (0-100%)
+- **Historical Data Storage**: All sensor readings stored in database
+- **Automatic Data Validation**: Input validation and error handling
+- **RESTful API**: Easy integration with external devices
+
 ### 🎨 Modern UI
 - Beautiful gradient design with green theme
 - Responsive layout for all devices
@@ -73,6 +85,14 @@ The SQLite database (`plants.db`) will be automatically created when you first r
 - `GET /api/plants/[id]` - Get a specific plant
 - `PUT /api/plants/[id]` - Update a plant
 - `DELETE /api/plants/[id]` - Delete a plant
+
+### Sensors
+- `GET /api/sensors` - Get latest sensor reading
+- `GET /api/sensors?limit=10` - Get last N readings
+- `GET /api/sensors?hours=24` - Get readings from last N hours
+- `POST /api/sensors` - Send sensor data (for Raspberry Pi)
+
+See [RASPBERRY_PI_INTEGRATION.md](./RASPBERRY_PI_INTEGRATION.md) for detailed sensor API documentation.
 
 ### Plant Data Structure
 ```typescript
@@ -155,6 +175,7 @@ src/
 
 ## Database Schema
 
+### Plants Table
 ```sql
 CREATE TABLE plants (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -173,6 +194,24 @@ CREATE TABLE plants (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+```
+
+### Sensor Readings Table
+```sql
+CREATE TABLE sensor_readings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  water_level REAL NOT NULL,
+  light_level REAL NOT NULL,
+  temperature REAL NOT NULL,
+  humidity REAL NOT NULL,
+  moisture REAL NOT NULL,
+  water_sensor_75 BOOLEAN NOT NULL DEFAULT 0,
+  water_sensor_50 BOOLEAN NOT NULL DEFAULT 0,
+  water_sensor_25 BOOLEAN NOT NULL DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_sensor_readings_created_at ON sensor_readings(created_at);
 ```
 
 ## Contributing
