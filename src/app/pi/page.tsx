@@ -320,7 +320,7 @@ export default function PiDisplay() {
       {/* Left Sidebar */}
       <Box
         width="250px"
-        bg="#f0fdf4"
+        bg="#d4f8dc"
         borderRight="2px solid #bbf7d0"
         display="flex"
         flexDirection="column"
@@ -335,8 +335,8 @@ export default function PiDisplay() {
           src="/SproutlyLogoDesign.png" 
           alt="Sproutly Logo" 
           style={{
-            width: "180px",
-            height: "180px",
+            width: "207px",
+            height: "207px",
           }}
         />
         
@@ -365,7 +365,7 @@ export default function PiDisplay() {
             size="2" 
             style={{ 
               color: '#16a34a', 
-              fontSize: '16px',
+              fontSize: '19px',
               marginTop: '16px',
               textAlign: 'center',
               fontWeight: '600',
@@ -393,9 +393,10 @@ export default function PiDisplay() {
               color: '#166534',
               fontWeight: '600',
               padding: '12px 24px',
-              fontSize: '14px',
+              fontSize: '17px',
               width: '100%',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#dcfce7';
