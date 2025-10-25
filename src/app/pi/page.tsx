@@ -317,6 +317,22 @@ export default function PiDisplay() {
         transition: 'background-color 1s ease'
       }}
     >
+      {/* Background Music */}
+      <audio
+        autoPlay
+        loop
+        style={{ display: 'none' }}
+        controls={false}
+        preload="auto"
+        volume={0.3}
+        onError={(e) => {
+          console.log('Audio file not found. Please add background-music.mp3 to /public/audio/');
+        }}
+      >
+        <source src="/audio/background-music.mp3" type="audio/mpeg" />
+        <source src="/audio/background-music.ogg" type="audio/ogg" />
+        Your browser does not support the audio element.
+      </audio>
       {/* Left Sidebar */}
       <Box
         width="250px"
