@@ -2,13 +2,19 @@
 
 import { HStack, Box } from "panda";
 import { Button, Badge } from "@radix-ui/themes";
+import { useRouter, usePathname } from 'next/navigation';
 
 interface NavigationProps {
-  currentPage: 'home' | 'plants';
-  onPageChange: (page: 'home' | 'plants') => void;
+  currentPage?: 'home' | 'plants';
+  onPageChange?: (page: 'home' | 'plants') => void;
 }
 
 export default function Navigation({ currentPage, onPageChange }: NavigationProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  // Determine current page from pathname if not provided
+  const actualCurrentPage = currentPage || (pathname === '/plants' ? 'plants' : 'home');
   return (
     <Box 
       position="fixed" 
@@ -45,15 +51,21 @@ export default function Navigation({ currentPage, onPageChange }: NavigationProp
         <HStack gap="4">
           <Button 
             size="2" 
-            variant={currentPage === 'home' ? 'solid' : 'outline'}
+            variant={actualCurrentPage === 'home' ? 'solid' : 'outline'}
             color="green"
-            onClick={() => onPageChange('home')}
+            onClick={() => {
+              if (onPageChange) {
+                onPageChange('home');
+              } else {
+                router.push('/');
+              }
+            }}
             style={{
-              background: currentPage === 'home' 
+              background: actualCurrentPage === 'home' 
                 ? 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)' 
                 : 'transparent',
-              border: currentPage === 'home' ? 'none' : '2px solid #22c55e',
-              color: currentPage === 'home' ? 'white' : '#15803d',
+              border: actualCurrentPage === 'home' ? 'none' : '2px solid #22c55e',
+              color: actualCurrentPage === 'home' ? 'white' : '#15803d',
               fontWeight: '600',
               transition: 'all 0.2s ease'
             }}
@@ -62,15 +74,21 @@ export default function Navigation({ currentPage, onPageChange }: NavigationProp
           </Button>
           <Button 
             size="2" 
-            variant={currentPage === 'plants' ? 'solid' : 'outline'}
+            variant={actualCurrentPage === 'plants' ? 'solid' : 'outline'}
             color="green"
-            onClick={() => onPageChange('plants')}
+            onClick={() => {
+              if (onPageChange) {
+                onPageChange('plants');
+              } else {
+                router.push('/plants');
+              }
+            }}
             style={{
-              background: currentPage === 'plants' 
+              background: actualCurrentPage === 'plants' 
                 ? 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)' 
                 : 'transparent',
-              border: currentPage === 'plants' ? 'none' : '2px solid #22c55e',
-              color: currentPage === 'plants' ? 'white' : '#15803d',
+              border: actualCurrentPage === 'plants' ? 'none' : '2px solid #22c55e',
+              color: actualCurrentPage === 'plants' ? 'white' : '#15803d',
               fontWeight: '600',
               transition: 'all 0.2s ease'
             }}

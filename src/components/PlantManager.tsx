@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { VStack, HStack, Box, Container } from "panda";
 import { Heading, Text, Button, Card, Badge, TextField, Select, TextArea } from "@radix-ui/themes";
 import { Plant, CreatePlantData } from '@/lib/database';
+import { useRouter } from 'next/navigation';
 
 interface PlantFormData {
   name: string;
@@ -21,6 +22,7 @@ interface PlantFormData {
 }
 
 export default function PlantManager() {
+  const router = useRouter();
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -169,19 +171,34 @@ export default function PlantManager() {
               Manage your plant collection and their care requirements
             </Text>
           </VStack>
-          <Button 
-            size="3" 
-            color="green"
-            onClick={() => setShowForm(true)}
-            style={{
-              background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
-              border: 'none',
-              color: 'white',
-              fontWeight: '600'
-            }}
-          >
-            Add New Plant
-          </Button>
+          <HStack gap="3">
+            <Button 
+              size="3" 
+              variant="outline"
+              onClick={() => router.push('/pi')}
+              style={{
+                borderColor: '#e5e7eb',
+                color: '#374151',
+                fontWeight: '600',
+                backgroundColor: 'white'
+              }}
+            >
+              PI Interface
+            </Button>
+            <Button 
+              size="3" 
+              color="green"
+              onClick={() => setShowForm(true)}
+              style={{
+                background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                border: 'none',
+                color: 'white',
+                fontWeight: '600'
+              }}
+            >
+              Add New Plant
+            </Button>
+          </HStack>
         </HStack>
 
         {showForm && (

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { VStack, HStack, Box, Container } from "panda";
-import { Heading, Text } from "@radix-ui/themes";
+import { Heading, Text, Button } from "@radix-ui/themes";
+import { useRouter } from 'next/navigation';
 
 interface SensorData {
   water_level: number;
@@ -210,6 +211,7 @@ function SensorBar({
 }
 
 export default function PiDisplay() {
+  const router = useRouter();
   const [sensorData, setSensorData] = useState<SensorData | null>(null);
   const [loading, setLoading] = useState(true);
   const [flashing, setFlashing] = useState(false);
@@ -421,7 +423,7 @@ export default function PiDisplay() {
         </HStack>
       </Container>
 
-      {/* Low water level warning */}
+            {/* Low water level warning */}
       {flashing && (
         <Box
           position="fixed"
@@ -439,7 +441,30 @@ export default function PiDisplay() {
         />
       )}
 
-
+      {/* Change Plant Button - Bottom Left */}
+      <Box
+        position="absolute"
+        bottom="20px"
+        left="20px"
+        zIndex="10"
+      >
+        <Button
+          variant="outline"
+          onClick={() => router.push('/plants')}
+          style={{ 
+            cursor: 'pointer',
+            backgroundColor: 'white',
+            borderColor: '#e5e7eb',
+            color: '#374151',
+            fontWeight: '500',
+            padding: '12px 24px',
+            fontSize: '14px'
+          }}
+        >
+          Change Plant
+        </Button>
+      </Box>
+ 
     </Box>
   );
 }
