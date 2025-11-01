@@ -1,0 +1,219 @@
+================================================================================
+  INSTRUCTIONS FOR PI CODE - QUICK REFERENCE
+================================================================================
+
+Hey! Your Pi code needs to update a JSON file with sensor data. Here's what
+you need to know:
+
+================================================================================
+  FILE TO UPDATE
+================================================================================
+
+Location: AutomatedPlanterSite/public/sensor_data.json
+
+This file should be updated with your sensor readings every 5 seconds (or
+whatever interval you prefer).
+
+================================================================================
+  JSON FORMAT (EXACT)
+================================================================================
+
+{
+  "moisture": 0.5,
+  "light": 0.75,
+  "temp": 22.24,
+  "humidity": 50.0,
+  "waterLevel": 3
+}
+
+================================================================================
+  FIELD DESCRIPTIONS
+================================================================================
+
+moisture    (float) - Soil moisture from 0.0 to 1.0
+                      0.0 = completely dry
+                      1.0 = completely wet
+                      Example: 0.5 = 50% moisture
+
+light       (float) - Light level from 0.0 to 1.0
+                      0.0 = complete darkness
+                      1.0 = maximum brightness
+                      Example: 0.75 = 75% light
+
+temp        (float) - Temperature in Celsius
+                      Any reasonable value (usually 15-35°C)
+                      Example: 22.24 = 22.24°C
+
+humidity    (float) - Relative humidity from 0.0 to 100.0
+                      0.0 = 0% humidity
+                      100.0 = 100% humidity
+                      Example: 50.0 = 50%
+
+waterLevel  (int)   - Water tank level from dip switches
+                      MUST be one of these values:
+                      0 = 15% (empty)
+                      1 = 50% (low)
+                      3 = 70% (medium)
+                      7 = 100% (full)
+
+================================================================================
+  WATER LEVEL MAPPING
+================================================================================
+
+The 3 dip switches give you these combinations:
+
+Switch States → waterLevel Value
+0 0 0 (all off)   → 0  (15% - nearly empty)
+0 0 1 (only 25%)  → 1  (50% - low)
+0 1 1 (50% + 25%) → 3  (70% - medium)
+1 1 1 (all on)    → 7  (100% - full)
+
+Just use the decimal value in your JSON.
+
+================================================================================
+  EXAMPLE PYTHON CODE
+================================================================================
+
+import json
+import time
+
+def update_sensors(moisture, light, temp, humidity, water_level):
+    # Create the data dictionary
+    data = {
+        'moisture': moisture,
+        'light': light,
+        'temp': temp,
+        'humidity': humidity,
+        'waterLevel': water_level
+    }
+    
+    # Write to the file
+    with open('AutomatedPlanterSite/public/sensor_data.json', 'w') as f:
+        json.dump(data, f, indent=2)
+
+# Example main loop
+while True:
+    # Read your sensors here
+    moisture = 0.5      # Replace with actual reading (0.0-1.0)
+    light = 0.75        # Replace with actual reading (0.0-1.0)
+    temp = 22.24        # Replace with actual reading (°C)
+    humidity = 50.0     # Replace with actual reading (0-100)
+    water_level = 3     # Replace with actual reading (0, 1, 3, or 7)
+    
+    # Update the file
+    update_sensors(moisture, light, temp, humidity, water_level)
+    
+    # Wait 5 seconds
+    time.sleep(5)
+
+================================================================================
+  EXAMPLE C CODE
+================================================================================
+
+#include <stdio.h>
+#include <unistd.h>
+
+void update_sensors(float moisture, float light, float temp, 
+                   float humidity, int water_level) {
+    FILE* f = fopen("AutomatedPlanterSite/public/sensor_data.json", "w");
+    
+    fprintf(f, "{\n");
+    fprintf(f, "  \"moisture\": %.2f,\n", moisture);
+    fprintf(f, "  \"light\": %.2f,\n", light);
+    fprintf(f, "  \"temp\": %.2f,\n", temp);
+    fprintf(f, "  \"humidity\": %.1f,\n", humidity);
+    fprintf(f, "  \"waterLevel\": %d\n", water_level);
+    fprintf(f, "}\n");
+    
+    fclose(f);
+}
+
+int main() {
+    while(1) {
+        // Read your sensors here
+        float moisture = 0.5;    // Replace with actual reading (0.0-1.0)
+        float light = 0.75;      // Replace with actual reading (0.0-1.0)
+        float temp = 22.24;      // Replace with actual reading (°C)
+        float humidity = 50.0;   // Replace with actual reading (0-100)
+        int water_level = 3;     // Replace with actual reading (0, 1, 3, or 7)
+        
+        // Update the file
+        update_sensors(moisture, light, temp, humidity, water_level);
+        
+        // Wait 5 seconds
+        sleep(5);
+    }
+    
+    return 0;
+}
+
+================================================================================
+  IMPORTANT NOTES
+================================================================================
+
+1. RANGES MATTER:
+   - moisture and light: MUST be 0.0 to 1.0 (NOT 0-100)
+   - humidity: 0.0 to 100.0
+   - waterLevel: ONLY 0, 1, 3, or 7 (nothing else)
+
+2. FILE PATH:
+   - Make sure you're writing to the correct path
+   - Use absolute path if needed
+   - File must be in: AutomatedPlanterSite/public/sensor_data.json
+
+3. JSON FORMAT:
+   - Use double quotes for keys
+   - No trailing commas
+   - Proper indentation (for debugging)
+
+4. UPDATE FREQUENCY:
+   - Every 5 seconds is good
+   - Website polls every 5 seconds
+   - Faster updates are fine but not necessary
+
+================================================================================
+  TESTING
+================================================================================
+
+To test if it's working:
+
+1. Run your Pi code
+2. Check the file was created:
+   cat AutomatedPlanterSite/public/sensor_data.json
+
+3. Open the website at http://localhost:3000/pi
+4. You should see your sensor values displayed
+5. Update your sensors and watch the values change
+
+================================================================================
+  COMMON MISTAKES TO AVOID
+================================================================================
+
+❌ WRONG: "waterLevel": 70  (should be 0, 1, 3, or 7)
+✅ RIGHT: "waterLevel": 3
+
+❌ WRONG: "moisture": 50  (should be 0.0-1.0)
+✅ RIGHT: "moisture": 0.5
+
+❌ WRONG: "light": 75  (should be 0.0-1.0)
+✅ RIGHT: "light": 0.75
+
+❌ WRONG: 'moisture': 0.5  (single quotes)
+✅ RIGHT: "moisture": 0.5  (double quotes)
+
+================================================================================
+  QUESTIONS?
+================================================================================
+
+If something isn't working:
+1. Check the JSON file exists and has proper format
+2. Verify the values are in the correct ranges
+3. Make sure the file path is correct
+4. Check file permissions (chmod 666 if needed)
+
+================================================================================
+
+That's it! Just write to that JSON file and the website will display it. 🌱
+
+================================================================================
+

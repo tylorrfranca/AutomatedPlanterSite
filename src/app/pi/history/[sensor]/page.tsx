@@ -75,13 +75,47 @@ export default function SensorHistory() {
   const config = sensorConfig[sensor as keyof typeof sensorConfig] || sensorConfig.water;
   
   useEffect(() => {
-    // Simulate loading
-    setIsLoading(true);
-    setTimeout(() => {
-      const data = generateMockHistory(sensor, timeRange);
-      setHistoryData(data);
-      setIsLoading(false);
-    }, 300);
+    const fetchHistoryData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch historical data from API
+        const response = await fetch(`/api/sensors?hours=${timeRange}`);
+        const data = await response.json();
+        
+        if (Array.isArray(data) && data.length > 0) {
+          // Extract the relevant sensor values
+          const sensorFieldMap: { [key: string]: keyof typeof data[0] } = {
+            water: 'water_level',
+            light: 'light_level',
+            temp: 'temperature',
+            humidity: 'humidity',
+            moisture: 'moisture'
+          };
+          
+          const field = sensorFieldMap[sensor] || 'water_level';
+          
+          const historyPoints = data.map(reading => ({
+            timestamp: reading.timestamp,
+            value: reading[field] as number
+          }));
+          
+          setHistoryData(historyPoints);
+        } else {
+          // If no database data, use mock data
+          const mockData = generateMockHistory(sensor, timeRange);
+          setHistoryData(mockData);
+        }
+      } catch (error) {
+        console.error('Error fetching history data:', error);
+        // Fallback to mock data on error
+        const mockData = generateMockHistory(sensor, timeRange);
+        setHistoryData(mockData);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchHistoryData();
   }, [sensor, timeRange]);
   
   // Update chart width on mount and resize

@@ -1,110 +1,158 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 import { sensorDb } from '@/lib/database';
-import type { CreateSensorReadingData, SensorReading } from '@/lib/database';
+import type { CreateSensorReadingData } from '@/lib/database';
 
-// Mock sensor data - fallback if no real data exists
-function getMockSensorData() {
-  return {
-    water_level: Math.random() * 100,
-    light_level: Math.random() * 100,
-    temperature: 20 + Math.random() * 15, // 20-35°C
-    humidity: 30 + Math.random() * 50, // 30-80%
-    moisture: Math.random() * 100,
-    water_sensors: {
-      level_75: Math.random() > 0.7,
-      level_50: Math.random() > 0.5,
-      level_25: Math.random() > 0.3,
+// Path to the sensor data JSON file (will be updated by Pi)
+const SENSOR_FILE_PATH = path.join(process.cwd(), 'public', 'sensor_data.json');
+
+// Interface for the Pi's JSON format
+interface PiSensorData {
+  moisture: number;      // 0.0 to 1.0
+  light: number;         // 0.0 to 1.0
+  temp: number;          // Temperature in Celsius
+  humidity: number;      // 0.0 to 100.0
+  waterLevel: number;    // 0, 1, 3, or 7
+}
+
+// Convert water level value to percentage and sensor states
+function convertWaterLevel(waterLevel: number): { percentage: number; level_75: boolean; level_50: boolean; level_25: boolean } {
+  switch (waterLevel) {
+    case 7:  // 100%
+      return { percentage: 100, level_75: true, level_50: true, level_25: true };
+    case 3:  // 70%
+      return { percentage: 70, level_75: false, level_50: true, level_25: true };
+    case 1:  // 50%
+      return { percentage: 50, level_75: false, level_50: true, level_25: false };
+    case 0:  // 15%
+      return { percentage: 15, level_75: false, level_50: false, level_25: false };
+    default:
+      return { percentage: 15, level_75: false, level_50: false, level_25: false };
+  }
+}
+
+// Read sensor data from JSON file
+function readSensorFile(): PiSensorData | null {
+  try {
+    if (!fs.existsSync(SENSOR_FILE_PATH)) {
+      console.log('Sensor file not found, creating default file');
+      // Create default sensor file
+      const defaultData: PiSensorData = {
+        moisture: 0.5,
+        light: 0.75,
+        temp: 22.24,
+        humidity: 50.0,
+        waterLevel: 3
+      };
+      fs.writeFileSync(SENSOR_FILE_PATH, JSON.stringify(defaultData, null, 2));
+      return defaultData;
     }
-  };
+    
+    const fileContent = fs.readFileSync(SENSOR_FILE_PATH, 'utf-8');
+    const data = JSON.parse(fileContent) as PiSensorData;
+    return data;
+  } catch (error) {
+    console.error('Error reading sensor file:', error);
+    return null;
+  }
 }
 
-// Calculate water level based on the 3 sensors at 75%, 50%, and 25%
-function calculateWaterLevel(sensors: { level_75: boolean; level_50: boolean; level_25: boolean }): number {
-  if (sensors.level_75) return 87.5; // Between 75% and 100%
-  if (sensors.level_50) return 62.5; // Between 50% and 75%
-  if (sensors.level_25) return 37.5; // Between 25% and 50%
-  return 12.5; // Below 25%
-}
+// Track last file modification time to avoid duplicate database entries
+let lastFileModTime = 0;
 
-// GET - Retrieve the latest sensor reading
+// GET - Retrieve sensor data (latest or historical)
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const limit = searchParams.get('limit');
     const hours = searchParams.get('hours');
-
-    let sensorData: SensorReading | SensorReading[] | undefined;
-
-    // Get recent readings from last N hours
+    
+    // If hours parameter is provided, return historical data from database
     if (hours) {
       const hoursNum = parseInt(hours);
       if (!isNaN(hoursNum) && hoursNum > 0) {
-        sensorData = sensorDb.getRecent(hoursNum);
+        const readings = sensorDb.getRecent(hoursNum);
+        
+        const formatted = readings.map(reading => ({
+          water_level: reading.water_level,
+          light_level: reading.light_level,
+          temperature: reading.temperature,
+          humidity: reading.humidity,
+          moisture: reading.moisture,
+          water_sensors: {
+            level_75: reading.water_sensor_75,
+            level_50: reading.water_sensor_50,
+            level_25: reading.water_sensor_25
+          },
+          timestamp: reading.created_at,
+          id: reading.id
+        }));
+        
+        return NextResponse.json(formatted);
       }
-    } 
-    // Get all readings with optional limit
-    else if (limit) {
-      const limitNum = parseInt(limit);
-      if (!isNaN(limitNum) && limitNum > 0) {
-        sensorData = sensorDb.getAll(limitNum);
-      }
-    } 
-    // Get latest single reading
-    else {
-      sensorData = sensorDb.getLatest();
     }
-
-    // If no data in database, return mock data
-    if (!sensorData) {
-      const mockData = getMockSensorData();
-      const actualWaterLevel = calculateWaterLevel(mockData.water_sensors);
+    
+    // Otherwise, read latest from JSON file and save to database
+    const piData = readSensorFile();
+    
+    if (!piData) {
+      return NextResponse.json(
+        { error: 'Failed to read sensor data file' },
+        { status: 500 }
+      );
+    }
+    
+    // Check if file has been modified since last read
+    try {
+      const stats = fs.statSync(SENSOR_FILE_PATH);
+      const currentModTime = stats.mtimeMs;
       
-      return NextResponse.json({
-        water_level: actualWaterLevel,
-        light_level: mockData.light_level,
-        temperature: mockData.temperature,
-        humidity: mockData.humidity,
-        moisture: mockData.moisture,
-        water_sensors: mockData.water_sensors,
-        timestamp: new Date().toISOString(),
-        is_mock: true
-      });
+      // If file was modified, save new data to database
+      if (currentModTime > lastFileModTime) {
+        lastFileModTime = currentModTime;
+        
+        // Convert Pi data format to database format
+        const waterLevelData = convertWaterLevel(piData.waterLevel);
+        
+        const dbData: CreateSensorReadingData = {
+          water_level: waterLevelData.percentage,
+          light_level: piData.light * 100,  // Convert 0.0-1.0 to 0-100
+          temperature: piData.temp,
+          humidity: piData.humidity,
+          moisture: piData.moisture * 100,  // Convert 0.0-1.0 to 0-100
+          water_sensor_75: waterLevelData.level_75,
+          water_sensor_50: waterLevelData.level_50,
+          water_sensor_25: waterLevelData.level_25
+        };
+        
+        // Save to database
+        const savedReading = sensorDb.create(dbData);
+        console.log('Sensor data saved to database:', {
+          id: savedReading.id,
+          timestamp: savedReading.created_at,
+          source: 'json_file'
+        });
+      }
+    } catch (err) {
+      console.error('Error checking file modification time:', err);
     }
-
-    // Format single reading response
-    if (Array.isArray(sensorData)) {
-      const formatted = sensorData.map(reading => ({
-        water_level: reading.water_level,
-        light_level: reading.light_level,
-        temperature: reading.temperature,
-        humidity: reading.humidity,
-        moisture: reading.moisture,
-        water_sensors: {
-          level_75: reading.water_sensor_75,
-          level_50: reading.water_sensor_50,
-          level_25: reading.water_sensor_25
-        },
-        timestamp: reading.created_at,
-        id: reading.id
-      }));
-
-      return NextResponse.json(formatted);
-    }
-
-    // Format single reading
+    
+    // Convert Pi data format to website format
+    const waterLevelData = convertWaterLevel(piData.waterLevel);
+    
     const formatted = {
-      water_level: sensorData.water_level,
-      light_level: sensorData.light_level,
-      temperature: sensorData.temperature,
-      humidity: sensorData.humidity,
-      moisture: sensorData.moisture,
+      water_level: waterLevelData.percentage,
+      light_level: piData.light * 100,  // Convert 0.0-1.0 to 0-100
+      temperature: piData.temp,
+      humidity: piData.humidity,
+      moisture: piData.moisture * 100,  // Convert 0.0-1.0 to 0-100
       water_sensors: {
-        level_75: sensorData.water_sensor_75,
-        level_50: sensorData.water_sensor_50,
-        level_25: sensorData.water_sensor_25
+        level_75: waterLevelData.level_75,
+        level_50: waterLevelData.level_50,
+        level_25: waterLevelData.level_25
       },
-      timestamp: sensorData.created_at,
-      id: sensorData.id
+      timestamp: new Date().toISOString(),
+      source: 'json_file'
     };
 
     return NextResponse.json(formatted);
@@ -117,82 +165,4 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Receive sensor data from Raspberry Pi
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-
-    // Validate required fields
-    const requiredFields = ['water_level', 'light_level', 'temperature', 'humidity', 'moisture'];
-    const missingFields = requiredFields.filter(field => body[field] === undefined);
-
-    if (missingFields.length > 0) {
-      return NextResponse.json(
-        { error: `Missing required fields: ${missingFields.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    // Prepare sensor reading data
-    const sensorData: CreateSensorReadingData = {
-      water_level: parseFloat(body.water_level),
-      light_level: parseFloat(body.light_level),
-      temperature: parseFloat(body.temperature),
-      humidity: parseFloat(body.humidity),
-      moisture: parseFloat(body.moisture),
-      water_sensor_75: Boolean(body.water_sensor_75 || body.water_sensors?.level_75),
-      water_sensor_50: Boolean(body.water_sensor_50 || body.water_sensors?.level_50),
-      water_sensor_25: Boolean(body.water_sensor_25 || body.water_sensors?.level_25)
-    };
-
-    // Validate data ranges
-    if (sensorData.water_level < 0 || sensorData.water_level > 100) {
-      return NextResponse.json(
-        { error: 'water_level must be between 0 and 100' },
-        { status: 400 }
-      );
-    }
-
-    if (sensorData.light_level < 0 || sensorData.light_level > 100) {
-      return NextResponse.json(
-        { error: 'light_level must be between 0 and 100' },
-        { status: 400 }
-      );
-    }
-
-    if (sensorData.humidity < 0 || sensorData.humidity > 100) {
-      return NextResponse.json(
-        { error: 'humidity must be between 0 and 100' },
-        { status: 400 }
-      );
-    }
-
-    if (sensorData.moisture < 0 || sensorData.moisture > 100) {
-      return NextResponse.json(
-        { error: 'moisture must be between 0 and 100' },
-        { status: 400 }
-      );
-    }
-
-    // Store in database
-    const savedReading = sensorDb.create(sensorData);
-
-    console.log('Sensor data received and saved:', {
-      id: savedReading.id,
-      timestamp: savedReading.created_at
-    });
-
-    return NextResponse.json({
-      success: true,
-      id: savedReading.id,
-      timestamp: savedReading.created_at,
-      message: 'Sensor data saved successfully'
-    }, { status: 201 });
-  } catch (error) {
-    console.error('Error saving sensor data:', error);
-    return NextResponse.json(
-      { error: 'Failed to save sensor data' },
-      { status: 500 }
-    );
-  }
-}
+// No POST endpoint needed - Pi will update the JSON file directly
