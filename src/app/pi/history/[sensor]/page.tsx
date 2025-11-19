@@ -146,9 +146,9 @@ export default function SensorHistory() {
   
   // Calculate min, max, and average
   const values = historyData.map(d => d.value);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  const min = values.length > 0 ? Math.min(...values) : 0;
+  const max = values.length > 0 ? Math.max(...values) : 0;
+  const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
   
   return (
     <Box
@@ -286,9 +286,13 @@ export default function SensorHistory() {
                 {historyData.length > 1 && (
                   <polyline
                     points={historyData.map((point, i) => {
-                      const x = 60 + (i / (historyData.length - 1)) * (chartWidth - 120);
+                      const divisor = historyData.length - 1 || 1; // Prevent division by zero
+                      const x = 60 + (i / divisor) * (chartWidth - 120);
                       const y = 360 - ((point.value / config.max) * 280) - 40;
-                      return `${x},${y}`;
+                      // Ensure values are valid numbers, default to 0 if NaN
+                      const validX = isNaN(x) ? 60 : x;
+                      const validY = isNaN(y) ? 360 : y;
+                      return `${validX},${validY}`;
                     }).join(' ')}
                     fill="none"
                     stroke={config.color}
@@ -300,13 +304,17 @@ export default function SensorHistory() {
                 
                 {/* Data points */}
                 {historyData.map((point, i) => {
-                  const x = 60 + (i / (historyData.length - 1)) * (chartWidth - 120);
+                  const divisor = historyData.length - 1 || 1; // Prevent division by zero
+                  const x = 60 + (i / divisor) * (chartWidth - 120);
                   const y = 360 - ((point.value / config.max) * 280) - 40;
+                  // Ensure values are valid numbers, default to 0 if NaN, then cast to string
+                  const validX = isNaN(x) ? 60 : x;
+                  const validY = isNaN(y) ? 360 : y;
                   return (
                     <circle
                       key={i}
-                      cx={x}
-                      cy={y}
+                      cx={String(validX)}
+                      cy={String(validY)}
                       r="4"
                       fill={config.color}
                       style={{ cursor: 'pointer' }}
