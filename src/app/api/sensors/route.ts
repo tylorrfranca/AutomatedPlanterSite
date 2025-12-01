@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { sensorDb } from '@/lib/database';
+import { sensorDb, plantDb } from '@/lib/database';
 import type { CreateSensorReadingData } from '@/lib/database';
 
 // Path to the sensor data JSON file (will be updated by Pi)
@@ -14,6 +14,10 @@ interface PiSensorData {
   temp: number;          // Temperature in Celsius
   humidity: number;      // 0.0 to 100.0
   waterLevel: number;    // 0, 1, 3, or 7
+  // Optional watering info (can be updated by Pi or calculated by API)
+  watering_frequency?: number;        // Days between waterings
+  time_left_before_water?: number;    // Days until next watering
+  pump_duration_seconds?: number;     // Seconds to run pump for water_amount
 }
 
 // Convert water level value to percentage and sensor states
@@ -61,6 +65,48 @@ function readSensorFile(): PiSensorData | null {
 // Track last file modification time to avoid duplicate database entries
 let lastFileModTime = 0;
 
+// Pump rate: 100 mL/min
+const PUMP_RATE_ML_PER_MIN = 100;
+
+// Calculate watering information for a plant
+function calculateWateringInfo(plantId: number | null) {
+  if (!plantId) {
+    return null;
+  }
+
+  const plant = plantDb.getById(plantId);
+  if (!plant) {
+    return null;
+  }
+
+  const wateringFrequencyDays = plant.watering_frequency;
+  const waterAmountMl = plant.water_amount;
+  
+  // Calculate pump duration in seconds
+  // Pump rate: 100 mL/min = 100/60 mL/sec
+  const pumpDurationSeconds = Math.round((waterAmountMl / PUMP_RATE_ML_PER_MIN) * 60);
+
+  // Calculate time left before next watering
+  let timeLeftBeforeWaterDays: number;
+  if (plant.last_watered_at) {
+    const lastWateredDate = new Date(plant.last_watered_at);
+    const now = new Date();
+    const daysSinceLastWater = (now.getTime() - lastWateredDate.getTime()) / (1000 * 60 * 60 * 24);
+    timeLeftBeforeWaterDays = Math.max(0, wateringFrequencyDays - daysSinceLastWater);
+  } else {
+    // If never watered, assume it needs watering now
+    timeLeftBeforeWaterDays = 0;
+  }
+
+  return {
+    watering_frequency: wateringFrequencyDays,
+    time_left_before_water: Math.round(timeLeftBeforeWaterDays * 10) / 10, // Round to 1 decimal
+    pump_duration_seconds: pumpDurationSeconds,
+    water_amount_ml: waterAmountMl,
+    needs_watering: timeLeftBeforeWaterDays <= 0
+  };
+}
+
 // GET - Retrieve sensor data (latest or historical)
 export async function GET(request: NextRequest) {
   try {
@@ -102,6 +148,13 @@ export async function GET(request: NextRequest) {
       );
     }
     
+    // Get plant ID from query parameter (if provided by Pi)
+    const plantIdParam = searchParams.get('plantId');
+    const plantId = plantIdParam ? parseInt(plantIdParam) : null;
+    
+    // Calculate watering information if plant ID is provided
+    const wateringInfo = calculateWateringInfo(plantId);
+    
     // Check if file has been modified since last read
     try {
       const stats = fs.statSync(SENSOR_FILE_PATH);
@@ -140,7 +193,7 @@ export async function GET(request: NextRequest) {
     // Convert Pi data format to website format
     const waterLevelData = convertWaterLevel(piData.waterLevel);
     
-    const formatted = {
+    const formatted: any = {
       water_level: waterLevelData.percentage,
       light_level: piData.light * 100,  // Convert 0.0-1.0 to 0-100
       temperature: piData.temp,
@@ -154,6 +207,11 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
       source: 'json_file'
     };
+
+    // Add watering information if available
+    if (wateringInfo) {
+      formatted.watering = wateringInfo;
+    }
 
     return NextResponse.json(formatted);
   } catch (error) {

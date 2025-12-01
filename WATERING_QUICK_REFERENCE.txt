@@ -1,0 +1,33 @@
+WATERING SYSTEM - QUICK REFERENCE
+==================================
+
+Pump Rate: 100 mL/min (fixed)
+
+API Call Example:
+  GET /api/sensors?plantId=1
+
+Response includes:
+  {
+    "watering": {
+      "watering_frequency": 14,        // Days between waterings
+      "time_left_before_water": 5.2,   // Days until next watering
+      "pump_duration_seconds": 150,    // Run pump for this many seconds
+      "water_amount_ml": 250,          // Amount of water needed
+      "needs_watering": false          // true when time_left <= 0
+    }
+  }
+
+Watering Flow:
+  1. Check: GET /api/sensors?plantId=X
+  2. If needs_watering == true:
+     - Run pump for pump_duration_seconds
+  3. After watering: POST /api/plants/X/water
+
+Pump Duration Calculation:
+  pump_duration_seconds = (water_amount_ml / 100) × 60
+
+Example:
+  - Plant needs 250 mL
+  - 250 / 100 = 2.5 minutes
+  - 2.5 × 60 = 150 seconds
+
