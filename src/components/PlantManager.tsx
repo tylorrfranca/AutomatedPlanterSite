@@ -145,9 +145,9 @@ export default function PlantManager() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(plantData)
         });
-        
-        await fetchPlants();
-        resetForm();
+      
+      await fetchPlants();
+      resetForm();
       }
     } catch (error) {
       console.error('Error saving plant:', error);
@@ -227,19 +227,19 @@ export default function PlantManager() {
             >
               PI Interface
             </Button>
-            <Button 
-              size="3" 
-              color="green"
-              onClick={() => setShowForm(true)}
-              style={{
-                background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
-                border: 'none',
-                color: 'white',
-                fontWeight: '600'
-              }}
-            >
-              Add New Plant
-            </Button>
+          <Button 
+            size="3" 
+            color="green"
+            onClick={() => setShowForm(true)}
+            style={{
+              background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+              border: 'none',
+              color: 'white',
+              fontWeight: '600'
+            }}
+          >
+            Add New Plant
+          </Button>
           </HStack>
         </HStack>
 
@@ -486,25 +486,25 @@ export default function PlantManager() {
                   >
                     Select Plant
                   </Button>
-                  <HStack gap="2" style={{ width: '100%' }}>
-                    <Button 
-                      size="2" 
-                      variant="outline"
-                      onClick={() => handleEdit(plant)}
-                      style={{ flex: 1 }}
-                    >
-                      Edit
-                    </Button>
-                    <Button 
-                      size="2" 
-                      color="red" 
-                      variant="outline"
-                      onClick={() => handleDelete(plant.id)}
-                      style={{ flex: 1 }}
-                    >
-                      Delete
-                    </Button>
-                  </HStack>
+                <HStack gap="2" style={{ width: '100%' }}>
+                  <Button 
+                    size="2" 
+                    variant="outline"
+                    onClick={() => handleEdit(plant)}
+                    style={{ flex: 1 }}
+                  >
+                    Edit
+                  </Button>
+                  <Button 
+                    size="2" 
+                    color="red" 
+                    variant="outline"
+                    onClick={() => handleDelete(plant.id)}
+                    style={{ flex: 1 }}
+                  >
+                    Delete
+                  </Button>
+                </HStack>
                 </VStack>
               </VStack>
             </Card>

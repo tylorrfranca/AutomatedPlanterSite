@@ -17,6 +17,13 @@ interface SensorData {
     level_25: boolean;
   };
   timestamp: string;
+  watering?: {
+    watering_frequency: number;
+    time_left_before_water: number;
+    pump_duration_seconds: number;
+    water_amount_ml: number;
+    needs_watering: boolean;
+  };
 }
 
 interface SensorBarProps {
@@ -28,6 +35,8 @@ interface SensorBarProps {
   goodZone?: { min: number; max: number };
   waterLevels?: boolean;
   sensorLevels?: { level_75: boolean; level_50: boolean; level_25: boolean };
+  isWateringBar?: boolean;
+  needsWatering?: boolean;
 }
 
 function SensorBar({ 
@@ -38,9 +47,14 @@ function SensorBar({
   color, 
   goodZone, 
   waterLevels = false,
-  sensorLevels 
+  sensorLevels,
+  isWateringBar = false,
+  needsWatering = false
 }: SensorBarProps) {
-  const percentage = (value / maxValue) * 100;
+  // For watering bar, calculate percentage based on time left (full = max time, empty = needs water)
+  const percentage = isWateringBar 
+    ? Math.max(0, Math.min(100, (value / maxValue) * 100))
+    : (value / maxValue) * 100;
   const isBelowThreshold = waterLevels && value < 25;
 
   // Calculate threshold positions for non-water sensors (measured from top)
@@ -134,7 +148,7 @@ function SensorBar({
         {!waterLevels && goodZone && (
           <>
             <div
-              style={{
+              style={{ 
                 position: 'absolute',
                 left: '0',
                 right: '0',
@@ -145,7 +159,7 @@ function SensorBar({
               }}
             />
             <div
-              style={{
+              style={{ 
                 position: 'absolute',
                 left: '0',
                 right: '0',
@@ -175,10 +189,12 @@ function SensorBar({
       </Box>
       
       <Text size="1" style={{ color: '#1f2937', fontSize: '28px', fontWeight: '600', textAlign: 'center', marginTop: '5px' }}>
-        {value.toFixed(1)}{unit}
+        {isWateringBar 
+          ? (needsWatering ? 'Ready!' : value.toFixed(1) + unit)
+          : value.toFixed(1) + unit}
       </Text>
       
-      {/* Water level status or placeholder for alignment */}
+      {/* Water level status, watering status, or placeholder for alignment */}
       {waterLevels ? (
         <Text 
           size="1" 
@@ -192,6 +208,18 @@ function SensorBar({
           {sensorLevels?.level_75 ? 'High' : 
            sensorLevels?.level_50 ? 'Medium' : 
            sensorLevels?.level_25 ? 'Low' : 'Critical'}
+        </Text>
+      ) : isWateringBar ? (
+        <Text 
+          size="1" 
+          style={{ 
+            color: needsWatering ? '#dc2626' : '#16a34a',
+            fontWeight: '600',
+            fontSize: '22px',
+            marginTop: '5px'
+          }}
+        >
+          {needsWatering ? 'Overdue!' : 'On Track'}
         </Text>
       ) : (
         <Text 
@@ -219,8 +247,23 @@ export default function PiDisplay() {
 
   const fetchSensorData = async () => {
     try {
-      const response = await fetch('/api/sensors');
+      // Get selected plant ID from localStorage
+      let selectedPlantId: string | null = null;
+      if (typeof window !== 'undefined') {
+        selectedPlantId = localStorage.getItem('selectedPlantId');
+        console.log('Selected Plant ID:', selectedPlantId);
+      }
+      
+      // Fetch sensor data with plant ID if available
+      const url = selectedPlantId 
+        ? `/api/sensors?plantId=${selectedPlantId}`
+        : '/api/sensors';
+      
+      console.log('Fetching sensor data from:', url);
+      const response = await fetch(url);
       const data = await response.json();
+      console.log('Sensor data received:', data);
+      console.log('Has watering data?', !!data.watering);
       setSensorData(data);
       
       // Trigger flashing if water level is below 25%
@@ -236,18 +279,26 @@ export default function PiDisplay() {
     // First check localStorage for selected plant
     if (typeof window !== 'undefined') {
       const selectedPlantName = localStorage.getItem('selectedPlantName');
-      if (selectedPlantName) {
+      const selectedPlantId = localStorage.getItem('selectedPlantId');
+      if (selectedPlantName && selectedPlantId) {
         setPlantName(selectedPlantName);
         return;
       }
     }
     
-    // Fallback to fetching from API
+    // Fallback to fetching from API and setting default plant
     try {
       const response = await fetch('/api/plants');
       const data = await response.json();
       if (data && data.length > 0) {
-        setPlantName(data[0].name);
+        const defaultPlant = data[0];
+        setPlantName(defaultPlant.name);
+        // Set default plant in localStorage if none selected
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('selectedPlantId', defaultPlant.id.toString());
+          localStorage.setItem('selectedPlantName', defaultPlant.name);
+          console.log('Default plant set:', defaultPlant.name);
+        }
       }
     } catch (error) {
       console.error('Error fetching plant data:', error);
@@ -529,10 +580,23 @@ export default function PiDisplay() {
                 color="#a855f7"
                 goodZone={{ min: 35, max: 65 }}
               />
+
+              {/* Time Left Before Watering */}
+              {sensorData.watering && (
+                <SensorBar
+                  label="Time to Water"
+                  value={Math.max(0, sensorData.watering.time_left_before_water)}
+                  maxValue={sensorData.watering.watering_frequency}
+                  unit=" days"
+                  color={sensorData.watering.needs_watering ? "#ef4444" : "#10b981"}
+                  isWateringBar={true}
+                  needsWatering={sensorData.watering.needs_watering}
+                />
+              )}
         </HStack>
       </Container>
 
-            {/* Low water level warning */}
+      {/* Low water level warning */}
       {flashing && (
         <Box
           position="fixed"

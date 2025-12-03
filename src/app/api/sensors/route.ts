@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
           temperature: reading.temperature,
           humidity: reading.humidity,
           moisture: reading.moisture,
-          water_sensors: {
+    water_sensors: {
             level_75: reading.water_sensor_75,
             level_50: reading.water_sensor_50,
             level_25: reading.water_sensor_25
@@ -136,8 +136,8 @@ export async function GET(request: NextRequest) {
         
         return NextResponse.json(formatted);
       }
-    }
-    
+}
+
     // Otherwise, read latest from JSON file and save to database
     const piData = readSensorFile();
     

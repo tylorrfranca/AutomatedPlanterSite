@@ -156,3 +156,5 @@ The `plants` table includes:
 - The API calculates `time_left_before_water` in days, rounded to 1 decimal place
 - Watering information is only included in the API response if `plantId` query parameter is provided
 
+
+
