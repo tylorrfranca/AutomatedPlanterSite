@@ -20,7 +20,6 @@ db.exec(`
     humidity_max REAL NOT NULL,
     temperature_min REAL NOT NULL,
     temperature_max REAL NOT NULL,
-    last_watered_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
@@ -40,13 +39,6 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_sensor_readings_created_at ON sensor_readings(created_at);
 `);
-
-// Migration: Add last_watered_at column if it doesn't exist
-try {
-  db.prepare('ALTER TABLE plants ADD COLUMN last_watered_at DATETIME').run();
-} catch (error) {
-  // Column already exists, ignore error
-}
 
 // Insert initial plant data
 const initialPlants = [
@@ -343,12 +335,14 @@ export const plantDb = {
     return result.changes > 0;
   },
 
-  // Mark plant as watered
-  markWatered: (id: number): Plant | undefined => {
-    const plant = plantDb.getById(id);
-    if (!plant) return undefined;
-
-    db.prepare('UPDATE plants SET last_watered_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(id);
+  markAsWatered: (id: number): Plant | undefined => {
+    const stmt = db.prepare(`
+      UPDATE plants 
+      SET last_watered_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `);
+    
+    stmt.run(id);
     return plantDb.getById(id);
   }
 };
