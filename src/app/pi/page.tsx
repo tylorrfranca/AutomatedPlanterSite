@@ -219,8 +219,23 @@ export default function PiDisplay() {
 
   const fetchSensorData = async () => {
     try {
-      const response = await fetch('/api/sensors');
+      // Get selected plant ID from localStorage
+      let selectedPlantId: string | null = null;
+      if (typeof window !== 'undefined') {
+        selectedPlantId = localStorage.getItem('selectedPlantId');
+        console.log('Selected Plant ID:', selectedPlantId);
+      }
+      
+      // Fetch sensor data with plant ID if available
+      const url = selectedPlantId 
+        ? `/api/sensors?plantId=${selectedPlantId}`
+        : '/api/sensors';
+      
+      console.log('Fetching sensor data from:', url);
+      const response = await fetch(url);
       const data = await response.json();
+      console.log('Sensor data received:', data);
+      console.log('Has watering data?', !!data.watering);
       setSensorData(data);
       
       // Trigger flashing if water level is below 25%
@@ -236,18 +251,26 @@ export default function PiDisplay() {
     // First check localStorage for selected plant
     if (typeof window !== 'undefined') {
       const selectedPlantName = localStorage.getItem('selectedPlantName');
-      if (selectedPlantName) {
+      const selectedPlantId = localStorage.getItem('selectedPlantId');
+      if (selectedPlantName && selectedPlantId) {
         setPlantName(selectedPlantName);
         return;
       }
     }
     
-    // Fallback to fetching from API
+    // Fallback to fetching from API and setting default plant
     try {
       const response = await fetch('/api/plants');
       const data = await response.json();
       if (data && data.length > 0) {
-        setPlantName(data[0].name);
+        const defaultPlant = data[0];
+        setPlantName(defaultPlant.name);
+        // Set default plant in localStorage if none selected
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('selectedPlantId', defaultPlant.id.toString());
+          localStorage.setItem('selectedPlantName', defaultPlant.name);
+          console.log('Default plant set:', defaultPlant.name, 'ID:', defaultPlant.id);
+        }
       }
     } catch (error) {
       console.error('Error fetching plant data:', error);
@@ -529,6 +552,19 @@ export default function PiDisplay() {
                 color="#a855f7"
                 goodZone={{ min: 35, max: 65 }}
               />
+
+              {/* Time Left Before Watering */}
+              {sensorData.watering && (
+                <SensorBar
+                  label="Time to Water"
+                  value={Math.max(0, sensorData.watering.time_left_before_water)}
+                  maxValue={sensorData.watering.watering_frequency}
+                  unit=" days"
+                  color={sensorData.watering.needs_watering ? "#ef4444" : "#10b981"}
+                  isWateringBar={true}
+                  needsWatering={sensorData.watering.needs_watering}
+                />
+              )}
         </HStack>
       </Container>
 
