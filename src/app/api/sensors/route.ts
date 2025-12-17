@@ -21,14 +21,14 @@ function convertWaterLevel(waterLevel: number): { percentage: number; level_75: 
   switch (waterLevel) {
     case 7:  // 100%
       return { percentage: 100, level_75: true, level_50: true, level_25: true };
-    case 3:  // 70%
-      return { percentage: 70, level_75: false, level_50: true, level_25: true };
+    case 3:  // 75%
+      return { percentage: 75, level_75: false, level_50: true, level_25: true };
     case 1:  // 50%
       return { percentage: 50, level_75: false, level_50: true, level_25: false };
-    case 0:  // 15%
-      return { percentage: 15, level_75: false, level_50: false, level_25: false };
+    case 0:  // 25%
+      return { percentage: 25, level_75: false, level_50: false, level_25: false };
     default:
-      return { percentage: 15, level_75: false, level_50: false, level_25: false };
+      return { percentage: 25, level_75: false, level_50: false, level_25: false };
   }
 }
 

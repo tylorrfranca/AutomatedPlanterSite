@@ -1,9 +1,9 @@
 {
   "moisture": 0.5,
-  "light": 3.3,
+  "light": 2.69,
   "temp": 22.24,
   "humidity": 50.0,
-  "waterLevel": 3,
+  "waterLevel": 0,
   "watering_frequency": 7,
   "time_left_before_water": 5.2,
   "pump_duration_seconds": 180
