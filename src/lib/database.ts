@@ -20,6 +20,7 @@ db.exec(`
     humidity_max REAL NOT NULL,
     temperature_min REAL NOT NULL,
     temperature_max REAL NOT NULL,
+    last_watered_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
@@ -39,6 +40,20 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_sensor_readings_created_at ON sensor_readings(created_at);
 `);
+
+// Migration: Add last_watered_at column if it doesn't exist (for existing databases)
+try {
+  const tableInfo = db.prepare("PRAGMA table_info(plants)").all() as Array<{ name: string }>;
+  const hasLastWateredAt = tableInfo.some(col => col.name === 'last_watered_at');
+  
+  if (!hasLastWateredAt) {
+    db.exec('ALTER TABLE plants ADD COLUMN last_watered_at DATETIME');
+    console.log('Migration: Added last_watered_at column to plants table');
+  }
+} catch (error) {
+  // Table might not exist yet, which is fine - it will be created with the column
+  console.log('Migration check skipped (table may not exist yet)');
+}
 
 // Insert initial plant data
 const initialPlants = [
