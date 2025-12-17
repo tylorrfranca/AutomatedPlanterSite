@@ -94,10 +94,18 @@ export default function SensorHistory() {
           
           const field = sensorFieldMap[sensor] || 'water_level';
           
-          const historyPoints = data.map(reading => ({
-            timestamp: reading.timestamp,
-            value: reading[field] as number
-          }));
+          const historyPoints = data.map(reading => {
+            const rawValue = reading[field] as number;
+            const value =
+              sensor === 'light'
+                ? Math.max(0, Math.min(100, ((3.3 - rawValue) / 3.3) * 100))
+                : rawValue;
+            
+            return {
+              timestamp: reading.timestamp,
+              value
+            };
+          });
           
           setHistoryData(historyPoints);
         } else {

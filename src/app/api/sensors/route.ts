@@ -10,7 +10,7 @@ const SENSOR_FILE_PATH = path.join(process.cwd(), 'public', 'sensor_data.json');
 // Interface for the Pi's JSON format
 interface PiSensorData {
   moisture: number;      // 0.0 to 1.0
-  light: number;         // 0.0 to 1.0
+  light: number;         // 0.0 to 3.3 volts (0 = brightest, 3.3 = darkest)
   temp: number;          // Temperature in Celsius
   humidity: number;      // 0.0 to 100.0
   waterLevel: number;    // 0, 1, 3, or 7
@@ -115,20 +115,20 @@ export async function GET(request: NextRequest) {
       if (!isNaN(hoursNum) && hoursNum > 0) {
         const readings = sensorDb.getRecent(hoursNum);
         
-        const formatted = readings.map(reading => ({
-          water_level: reading.water_level,
-          light_level: reading.light_level,
-          temperature: reading.temperature,
-          humidity: reading.humidity,
-          moisture: reading.moisture,
-          water_sensors: {
-            level_75: reading.water_sensor_75,
-            level_50: reading.water_sensor_50,
-            level_25: reading.water_sensor_25
-          },
-          timestamp: reading.created_at,
-          id: reading.id
-        }));
+    const formatted = readings.map(reading => ({
+      water_level: reading.water_level,
+      light_level: reading.light_level,
+      temperature: reading.temperature,
+      humidity: reading.humidity,
+      moisture: reading.moisture,
+      water_sensors: {
+        level_75: reading.water_sensor_75,
+        level_50: reading.water_sensor_50,
+        level_25: reading.water_sensor_25
+      },
+      timestamp: reading.created_at,
+      id: reading.id
+    }));
         
         return NextResponse.json(formatted);
       }
@@ -155,10 +155,11 @@ export async function GET(request: NextRequest) {
         
         // Convert Pi data format to database format
         const waterLevelData = convertWaterLevel(piData.waterLevel);
+        const lightVoltage = Math.max(0, Math.min(3.3, piData.light));
         
         const dbData: CreateSensorReadingData = {
           water_level: waterLevelData.percentage,
-          light_level: piData.light * 100,  // Convert 0.0-1.0 to 0-100
+          light_level: lightVoltage,  // 0.0 (brightest) to 3.3 (darkest)
           temperature: piData.temp,
           humidity: piData.humidity,
           moisture: piData.moisture * 100,  // Convert 0.0-1.0 to 0-100
@@ -188,10 +189,11 @@ export async function GET(request: NextRequest) {
     
     // Convert Pi data format to website format
     const waterLevelData = convertWaterLevel(piData.waterLevel);
+  const lightVoltage = Math.max(0, Math.min(3.3, piData.light));
     
     const formatted: any = {
       water_level: waterLevelData.percentage,
-      light_level: piData.light * 100,  // Convert 0.0-1.0 to 0-100
+    light_level: lightVoltage,  // 0.0 (brightest) to 3.3 (darkest)
       temperature: piData.temp,
       humidity: piData.humidity,
       moisture: piData.moisture * 100,  // Convert 0.0-1.0 to 0-100

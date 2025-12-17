@@ -513,15 +513,19 @@ export default function PiDisplay() {
                 sensorLevels={sensorData.water_sensors}
               />
 
-              {/* Light Sensor */}
-              <SensorBar
-                label="Light"
-                value={sensorData.light_level}
-                maxValue={100}
-                unit="%"
-                color="#eab308"
-                goodZone={{ min: 35, max: 65 }}
-              />
+            {/* Light Sensor (0% at 3.3V darkest, 100% at 0V brightest) */}
+            <SensorBar
+              label="Light"
+              value={(() => {
+                const v = sensorData.light_level;
+                const percent = ((3.3 - v) / 3.3) * 100;
+                return Math.max(0, Math.min(100, percent));
+              })()}
+              maxValue={100}
+              unit="%"
+              color="#eab308"
+              goodZone={{ min: 24, max: 76 }}
+            />
 
               {/* Temperature Sensor */}
               <SensorBar
