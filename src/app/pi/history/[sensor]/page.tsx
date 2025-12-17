@@ -98,7 +98,7 @@ export default function SensorHistory() {
             const rawValue = reading[field] as number;
             const value =
               sensor === 'light'
-                ? Math.max(0, Math.min(100, ((3.3 - rawValue) / 3.3) * 100))
+                ? Math.max(0, Math.min(100, ((3.3 - Number(rawValue ?? 0)) / 3.3) * 100))
                 : rawValue;
             
             return {

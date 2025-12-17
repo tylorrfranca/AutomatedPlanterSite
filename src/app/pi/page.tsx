@@ -517,7 +517,7 @@ export default function PiDisplay() {
             <SensorBar
               label="Light"
               value={(() => {
-                const v = sensorData.light_level;
+                const v = Number(sensorData.light_level ?? 0);
                 const percent = ((3.3 - v) / 3.3) * 100;
                 return Math.max(0, Math.min(100, percent));
               })()}
