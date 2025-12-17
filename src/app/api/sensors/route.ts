@@ -156,13 +156,15 @@ export async function GET(request: NextRequest) {
         // Convert Pi data format to database format
         const waterLevelData = convertWaterLevel(piData.waterLevel);
         const lightVoltage = Math.max(0, Math.min(3.3, piData.light));
+        const moistureVoltage = Math.max(0, Math.min(3.3, piData.moisture));
+        const moisturePercent = (moistureVoltage / 3.3) * 100;
         
         const dbData: CreateSensorReadingData = {
           water_level: waterLevelData.percentage,
           light_level: lightVoltage,  // 0.0 (brightest) to 3.3 (darkest)
           temperature: piData.temp,
           humidity: piData.humidity,
-          moisture: piData.moisture * 100,  // Convert 0.0-1.0 to 0-100
+          moisture: moisturePercent,  // 0.0 to 3.3 volts -> 0-100%
           water_sensor_75: waterLevelData.level_75,
           water_sensor_50: waterLevelData.level_50,
           water_sensor_25: waterLevelData.level_25
@@ -188,15 +190,17 @@ export async function GET(request: NextRequest) {
     const wateringInfo = calculateWateringInfo(plantId);
     
     // Convert Pi data format to website format
-    const waterLevelData = convertWaterLevel(piData.waterLevel);
+  const waterLevelData = convertWaterLevel(piData.waterLevel);
   const lightVoltage = Math.max(0, Math.min(3.3, piData.light));
+  const moistureVoltage = Math.max(0, Math.min(3.3, piData.moisture));
+  const moisturePercent = (moistureVoltage / 3.3) * 100;
     
     const formatted: any = {
       water_level: waterLevelData.percentage,
     light_level: lightVoltage,  // 0.0 (brightest) to 3.3 (darkest)
       temperature: piData.temp,
       humidity: piData.humidity,
-      moisture: piData.moisture * 100,  // Convert 0.0-1.0 to 0-100
+    moisture: moisturePercent,  // 0.0 to 3.3 volts -> 0-100%
       water_sensors: {
         level_75: waterLevelData.level_75,
         level_50: waterLevelData.level_50,
