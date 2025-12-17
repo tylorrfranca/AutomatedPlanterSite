@@ -59,14 +59,14 @@ function SensorBar({
   }
 
   return (
-    <VStack gap="1" alignItems="center" style={{ minWidth: '130px', height: '550px', justifyContent: 'flex-start' }}>
-      <Text size="1" weight="medium" style={{ color: '#374151', fontSize: '28px', marginBottom: '5px' }}>
+    <VStack gap="1" alignItems="center" style={{ minWidth: '105px', height: '550px', justifyContent: 'flex-start' }}>
+      <Text size="1" weight="medium" style={{ color: '#374151', fontSize: '20px', marginBottom: '5px' }}>
         {label}
       </Text>
       
       <Box
         position="relative"
-        width="100px"
+        width="81px"
         height="470px"
         bg="#f3f4f6"
         borderRadius="10px"
@@ -174,7 +174,7 @@ function SensorBar({
         />
       </Box>
       
-      <Text size="1" style={{ color: '#1f2937', fontSize: '28px', fontWeight: '600', textAlign: 'center', marginTop: '5px' }}>
+      <Text size="1" style={{ color: '#1f2937', fontSize: '20px', fontWeight: '600', textAlign: 'center', marginTop: '5px' }}>
         {value.toFixed(1)}{unit}
       </Text>
       
@@ -500,7 +500,7 @@ export default function PiDisplay() {
         height="100vh"
         flex="1"
       >
-        <HStack gap="20" alignItems="center" flexWrap="wrap" justify="center" style={{ paddingTop: '0px' }}>
+        <HStack gap="10" alignItems="center" flexWrap="wrap" justify="center" style={{ paddingTop: '0px' }}>
           
               {/* Water Level Sensor */}
               <SensorBar
@@ -556,7 +556,7 @@ export default function PiDisplay() {
               {/* Time Left Before Watering */}
               {sensorData.watering && (
                 <SensorBar
-                  label="Time to Water"
+                  label="Next Water"
                   value={Math.max(0, sensorData.watering.time_left_before_water)}
                   maxValue={sensorData.watering.watering_frequency}
                   unit=" days"
